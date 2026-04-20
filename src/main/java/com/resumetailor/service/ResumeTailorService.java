@@ -76,6 +76,7 @@ public class ResumeTailorService {
                     .docxDownloadUrl(docxUrl)
                     .format(outputFormat)
                     .changes(tailored.changes())
+                    .keywords(tailored.keywords())
                     .build();
 
         } catch (IllegalArgumentException e) {

@@ -3,6 +3,7 @@ package com.resumetailor.service;
 import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.resumetailor.dto.ChangeHighlight;
+import com.resumetailor.dto.KeywordMatch;
 import com.resumetailor.dto.OpenAIDtos.*;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Value;
@@ -19,7 +20,7 @@ import java.util.List;
 @Service
 public class OpenAIService {
 
-    public record TailoredResult(String tailoredText, List<ChangeHighlight> changes) {}
+    public record TailoredResult(String tailoredText, List<ChangeHighlight> changes, List<KeywordMatch> keywords) {}
 
     private final WebClient webClient;
     private final String model;
@@ -103,10 +104,24 @@ public class OpenAIService {
                 }
             }
 
-            return new TailoredResult(tailoredText, changes);
+            List<KeywordMatch> keywords = new ArrayList<>();
+            JsonNode keywordsNode = root.path("keywords");
+            if (keywordsNode.isArray()) {
+                String lowerText = tailoredText.toLowerCase();
+                for (JsonNode kw : keywordsNode) {
+                    String keyword = kw.asText();
+                    boolean present = lowerText.contains(keyword.toLowerCase());
+                    keywords.add(KeywordMatch.builder()
+                            .keyword(keyword)
+                            .present(present)
+                            .build());
+                }
+            }
+
+            return new TailoredResult(tailoredText, changes, keywords);
         } catch (Exception e) {
             log.warn("Could not parse structured JSON response, treating as plain text: {}", e.getMessage());
-            return new TailoredResult(rawJson, List.of());
+            return new TailoredResult(rawJson, List.of(), List.of());
         }
     }
 
@@ -115,10 +130,12 @@ public class OpenAIService {
                 You are an expert career coach and professional resume writer.
                 Your task is to tailor a resume for a specific job posting.
 
-                Return a JSON object with exactly two fields:
+                Return a JSON object with exactly three fields:
                 1. "tailoredText": the full tailored resume as a plain text string \
                 (preserve the original structure and all formatting conventions such as ALL-CAPS headers)
-                2. "changes": an array of the most meaningful changes made, each item containing:
+                2. "keywords": an array of the most important technical skills, tools, and role-specific terms \
+                extracted from the job description (10 to 20 items, plain strings only)
+                3. "changes": an array of the most meaningful changes made, each item containing:
                    - "original": the original phrase or sentence (concise, max 200 chars)
                    - "tailored": the new version of that phrase or sentence
                    - "reason": a brief explanation of why this change improves the resume for this specific role

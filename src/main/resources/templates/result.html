@@ -169,6 +169,29 @@
             </div>
         </div>
 
+        <div class="keywords-section" th:if="${keywords != null and !#lists.isEmpty(keywords)}">
+            <button class="changes-toggle" onclick="toggleKeywords()" id="keywordsToggle">
+                <span class="changes-badge" th:text="${#lists.size(keywords)}">0</span>
+                <span class="changes-toggle-label">Keywords from job description</span>
+                <span class="changes-chevron" id="keywordsChevron">▼</span>
+            </button>
+
+            <div class="keywords-list" id="keywordsList">
+                <div class="keywords-grid">
+                    <span th:each="kw : ${keywords}"
+                          th:classappend="${kw.present} ? 'kw-present' : 'kw-absent'"
+                          class="kw-tag">
+                        <span class="kw-dot"></span>
+                        <span th:text="${kw.keyword}"></span>
+                    </span>
+                </div>
+                <div class="keywords-legend">
+                    <span class="legend-item"><span class="kw-dot kw-dot-present"></span> Present in resume</span>
+                    <span class="legend-item"><span class="kw-dot kw-dot-absent"></span> Not found</span>
+                </div>
+            </div>
+        </div>
+
         <div class="panel">
             <div class="panel-header">
                 <span class="panel-title">✦ Tailored resume</span>
@@ -228,6 +251,11 @@
     function toggleChanges() {
         document.getElementById('changesList').classList.toggle('visible');
         document.getElementById('changesChevron').classList.toggle('open');
+    }
+
+    function toggleKeywords() {
+        document.getElementById('keywordsList').classList.toggle('visible');
+        document.getElementById('keywordsChevron').classList.toggle('open');
     }
 </script>
 

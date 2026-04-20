@@ -15,12 +15,13 @@ public class TailorResponse {
     private String docxDownloadUrl;
     private String format;
     private List<ChangeHighlight> changes;
+    private List<KeywordMatch> keywords;
 
     public TailorResponse() {}
 
     public TailorResponse(boolean success, String message, String tailoredResumeText,
         String downloadUrl, String docxDownloadUrl,
-        String format, List<ChangeHighlight> changes) {
+        String format, List<ChangeHighlight> changes, List<KeywordMatch> keywords) {
         this.success = success;
         this.message = message;
         this.tailoredResumeText = tailoredResumeText;
@@ -28,6 +29,7 @@ public class TailorResponse {
         this.docxDownloadUrl = docxDownloadUrl;
         this.format = format;
         this.changes = changes;
+        this.keywords = keywords;
     }
 
     public boolean isSuccess() { return success; }
@@ -37,6 +39,7 @@ public class TailorResponse {
     public String getDocxDownloadUrl() { return docxDownloadUrl; }
     public String getFormat() { return format; }
     public List<ChangeHighlight> getChanges() { return changes; }
+    public List<KeywordMatch> getKeywords() { return keywords; }
 
     public void setSuccess(boolean success) { this.success = success; }
     public void setMessage(String message) { this.message = message; }
@@ -45,4 +48,5 @@ public class TailorResponse {
     public void setDocxDownloadUrl(String docxDownloadUrl) { this.docxDownloadUrl = docxDownloadUrl; }
     public void setFormat(String format) { this.format = format; }
     public void setChanges(List<ChangeHighlight> changes) { this.changes = changes; }
+    public void setKeywords(List<KeywordMatch> keywords) { this.keywords = keywords; }
 }

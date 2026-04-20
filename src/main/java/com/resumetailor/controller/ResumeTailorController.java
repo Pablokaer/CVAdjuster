@@ -102,6 +102,7 @@ public class ResumeTailorController {
             model.addAttribute("docxPublicUrl", docxPublicUrl);
             model.addAttribute("format", response.getFormat());
             model.addAttribute("changes", response.getChanges());
+            model.addAttribute("keywords", response.getKeywords());
 
             if (principal != null) {
                 final String finalPdfUrl  = pdfUrl;
