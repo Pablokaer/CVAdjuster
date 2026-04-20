@@ -252,13 +252,27 @@
     display: inline-flex;
     align-items: center;
     gap: 8px;
-    color: var(--text-muted);
-    text-decoration: none;
+    color: white;
+    background: linear-gradient(90deg, #7c5cff, #a88cff);
+    border: 1px solid rgba(255,255,255,.12);
+    box-shadow: 0 18px 50px rgba(124,92,255,.26);
+    border-radius: 18px;
+    padding: 10px 18px;
     font-size: 14px;
+    font-weight: 700;
+    letter-spacing: .2px;
+    text-decoration: none;
     margin-bottom: 32px;
-    transition: color 0.2s;
+    transition: transform .12s ease, box-shadow .12s ease;
 }
-.back-link:hover { color: var(--text); }
+.back-link:hover {
+    transform: translateY(-1px);
+    box-shadow: 0 22px 60px rgba(124,92,255,.34);
+}
+.back-link:active {
+    transform: translateY(0px);
+    box-shadow: 0 14px 40px rgba(124,92,255,.22);
+}
 
 @media (max-width: 560px) {
     .hcard-footer { gap: 6px; }

@@ -49,6 +49,15 @@ public class ResumeTailorService {
                         .build();
             }
 
+            int wordCount = resumeText.trim().isEmpty() ? 0 : resumeText.trim().split("\\s+").length;
+            if (wordCount > 2000) {
+                return TailorResponse.builder()
+                        .success(false)
+                        .message("Your resume exceeds the 2,000-word limit (" + wordCount + " words detected). " +
+                                 "Please shorten it before submitting.")
+                        .build();
+            }
+
             // 2. Call OpenAI API to tailor the resume
             log.info("Step 2: Tailoring resume with AI...");
             OpenAIService.TailoredResult tailored = openAIService.tailorResume(resumeText, jobDescription);
