@@ -5,7 +5,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Resume Tailor — AI-Powered Resume Builder</title>
+    <title>Fit My CV — AI-Powered Resume Builder</title>
 
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link href="https://fonts.googleapis.com/css2?family=Syne:wght@400;600;700;800&family=DM+Sans:wght@300;400;500&display=swap" rel="stylesheet">
@@ -20,13 +20,13 @@
 <nav class="topbar">
     <div class="topbar-inner">
 
-        <a href="/" class="topbar-brand">Resume Tailor</a>
+        <a href="/" class="topbar-brand">Fit My CV</a>
 
         <div class="topbar-actions">
 
             <div sec:authorize="!isAuthenticated()" style="display:flex; gap:10px;">
-                <a href="/login" class="btn-nav-outline">Sign in</a>
                 <a href="/register" class="btn-nav-primary">Create account</a>
+                <a href="/login" class="btn-nav-outline">Login</a>
             </div>
 
             <div sec:authorize="isAuthenticated()" class="user-menu">
@@ -99,7 +99,7 @@
          sec:authorize="!isAuthenticated()"
          style="text-align:center; padding: 56px 40px;">
 
-        <div style="font-size:48px; margin-bottom:20px;">✦</div>
+        <!--<div style="font-size:48px; margin-bottom:20px;">✦</div>-->
 
         <h2 style="font-family:'Syne'; font-weight:700;">
             Get started for free
@@ -111,16 +111,15 @@
 
         <div style="display:flex; flex-direction:column; gap:12px; max-width:320px; margin:auto;">
 
-            <a href="/login" class="btn-submit" style="text-decoration:none;">
-                Sign in with Email
+            <a href="/register" class="btn-submit" style="text-decoration:none; width:100%; text-align:center;">
+                Sign Up
             </a>
 
-            <a href="/oauth2/authorization/google"
+            <a href="/login"
                class="btn-nav-outline"
-               style="text-decoration:none;">
-                Continue with Google
+               style="text-decoration:none; display:flex; align-items:center; justify-content:center; font-size: 15px; width:100%;">
+                Login
             </a>
-
         </div>
     </div>
 
@@ -133,7 +132,7 @@
 
             <div class="form-grid">
 
-                <div class="field">
+                <div class="field full">
                     <label>Resume (PDF ou DOCX)</label>
 
                     <div class="upload-zone" id="uploadZone">
@@ -164,6 +163,7 @@
                               required></textarea>
                 </div>
 
+                <!--
                 <div class="field full">
                     <label>Output Format</label>
 
@@ -184,12 +184,13 @@
                         </div>
                     </div>
                 </div>
+                -->
 
                 <div class="field full">
                     <button type="submit"
                             class="btn-submit"
                             id="submitBtn">
-                        ✦ Tailor Resume
+                        ✦ Fix My CV
                     </button>
                 </div>
 
@@ -199,7 +200,7 @@
     </div>
 
     <footer>
-        Resume Tailor · Spring Boot + AI
+        Fix My CV · Spring Boot + AI
     </footer>
 
 </div>
