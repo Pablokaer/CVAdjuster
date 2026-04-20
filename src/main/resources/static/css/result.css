@@ -36,7 +36,7 @@
 }
 
 /* Header */
-.success-header { margin-bottom: 40px; animation: fadeDown 0.5s ease both; }
+.success-header { margin-bottom: 40px; animation: fadeDown 0.5s ease both; text-align: center; }
 
 .success-badge {
     display: inline-flex;
@@ -61,10 +61,11 @@ h1 {
     line-height: 1.1;
     margin-bottom: 10px;
 }
-.subtitle { color: var(--text-muted); font-size: 15px; max-width: 520px; line-height: 1.6; }
+.subtitle { color: var(--text-muted); font-size: 15px; max-width: 520px; line-height: 1.6; margin: 0 auto; }
 
 .stats-row {
     display: flex;
+    justify-content: center;
     gap: 28px;
     flex-wrap: wrap;
     margin-top: 28px;
@@ -90,6 +91,8 @@ h1 {
     gap: 16px;
     margin-bottom: 20px;
     animation: fadeUp 0.5s ease 0.05s both;
+    justify-items: center;
+    text-align: center;
 }
 @media (max-width: 720px) { .actions-grid { grid-template-columns: 1fr; } }
 
@@ -100,6 +103,8 @@ h1 {
     padding: 22px 20px;
     display: flex;
     flex-direction: column;
+    align-items: center;
+    text-align: center;
     gap: 10px;
     transition: transform 0.2s, box-shadow 0.2s, border-color 0.2s;
     text-decoration: none;
