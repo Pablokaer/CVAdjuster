@@ -57,7 +57,7 @@ h1 .highlight {
     line-height: 1.6;
 }
 
-/* Steps */
+/* Steps indicator */
 .steps {
     display: flex;
     justify-content: center;
@@ -89,36 +89,7 @@ h1 .highlight {
     color: var(--border);
 }
 
-/* Error banner */
-.alert {
-    padding: 14px 18px;
-    border-radius: var(--radius);
-    margin-bottom: 24px;
-    font-size: 14px;
-    display: flex;
-    align-items: center;
-    gap: 10px;
-    animation: fadeDown 0.4s ease both;
-}
-.alert-error {
-    background: rgba(248,113,113,0.1);
-    border: 1px solid rgba(248,113,113,0.3);
-    color: var(--error);
-}
-
-/* Form card */
-.card {
-    background: var(--surface);
-    border: 1px solid var(--border);
-    border-radius: 20px;
-    padding: 40px;
-    animation: fadeUp 0.6s ease 0.1s both;
-    transition: box-shadow 0.3s;
-}
-.card:hover {
-    box-shadow: 0 0 60px rgba(124,106,247,0.06);
-}
-
+/* Form grid */
 .form-grid {
     display: grid;
     grid-template-columns: 1fr 1fr;
@@ -127,23 +98,6 @@ h1 .highlight {
 @media (max-width: 680px) {
     .form-grid { grid-template-columns: 1fr; }
 }
-
-.field {
-    display: flex;
-    flex-direction: column;
-    gap: 8px;
-}
-.field.full { grid-column: 1 / -1; }
-
-label {
-    font-family: 'Syne', sans-serif;
-    font-size: 12px;
-    font-weight: 600;
-    letter-spacing: 0.06em;
-    text-transform: uppercase;
-    color: var(--text-muted);
-}
-label span { color: var(--accent); margin-left: 3px; }
 
 /* Upload zone */
 .upload-zone {
@@ -201,7 +155,7 @@ textarea:focus {
 }
 textarea::placeholder { color: var(--border); }
 
-/* Format selector */
+/* Format selector — radio card buttons */
 .format-options {
     display: flex;
     gap: 12px;
@@ -220,8 +174,11 @@ textarea::placeholder { color: var(--border); }
     border: 1px solid var(--border);
     border-radius: var(--radius);
     cursor: pointer;
+    font-family: 'DM Sans', sans-serif;
     font-size: 14px;
     font-weight: 500;
+    letter-spacing: 0;
+    text-transform: none;
     background: var(--surface-2);
     transition: all 0.2s;
     color: var(--text-muted);
@@ -232,35 +189,6 @@ textarea::placeholder { color: var(--border); }
     color: var(--text);
 }
 .format-label:hover { border-color: rgba(124,106,247,0.4); }
-
-/* Submit button */
-.btn-submit {
-    width: 100%;
-    padding: 16px;
-    background: linear-gradient(135deg, var(--accent), #9c84f7);
-    color: white;
-    border: none;
-    border-radius: var(--radius);
-    font-family: 'Syne', sans-serif;
-    font-size: 15px;
-    font-weight: 700;
-    letter-spacing: 0.02em;
-    cursor: pointer;
-    transition: all 0.2s;
-    position: relative;
-    overflow: hidden;
-    margin-top: 8px;
-}
-.btn-submit:hover {
-    transform: translateY(-1px);
-    box-shadow: 0 8px 30px rgba(124,106,247,0.4);
-}
-.btn-submit:active { transform: translateY(0); }
-.btn-submit:disabled {
-    opacity: 0.6;
-    cursor: not-allowed;
-    transform: none;
-}
 
 /* Loading overlay */
 .loading-overlay {

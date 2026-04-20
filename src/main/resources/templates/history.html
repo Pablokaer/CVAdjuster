@@ -1,0 +1,187 @@
+<!DOCTYPE html>
+<html lang="en"
+      xmlns:th="http://www.thymeleaf.org"
+      xmlns:sec="http://www.thymeleaf.org/extras/spring-security">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>History — Resume Tailor</title>
+
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link href="https://fonts.googleapis.com/css2?family=Syne:wght@400;600;700;800&family=DM+Sans:wght@300;400;500&family=DM+Mono:wght@400;500&display=swap" rel="stylesheet">
+
+    <link rel="icon" type="image/png" th:href="@{/favicon.png}">
+    <link rel="stylesheet" th:href="@{/css/base.css}">
+    <link rel="stylesheet" th:href="@{/css/history.css}">
+</head>
+
+<body>
+
+<nav class="topbar">
+    <div class="topbar-inner">
+        <a href="/" class="topbar-brand">Resume Tailor</a>
+
+        <div class="topbar-actions">
+            <div sec:authorize="isAuthenticated()" class="user-menu">
+
+                <a href="/history" class="btn-nav-outline" style="display:inline-flex; align-items:center; gap:6px;">
+                    <svg xmlns="http://www.w3.org/2000/svg" width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><circle cx="12" cy="12" r="10"/><polyline points="12 6 12 12 16 14"/></svg>
+                    History
+                </a>
+
+                <img class="user-avatar"
+                     th:if="${#authentication.principal instanceof T(org.springframework.security.oauth2.core.user.OAuth2User)}"
+                     th:src="${#authentication.principal.attributes['picture']}"
+                     onerror="this.style.display='none'"/>
+
+                <span class="user-name" th:text="${#authentication.name}"></span>
+
+                <form th:action="@{/logout}" method="post">
+                    <button type="submit" class="btn-logout">Sign out</button>
+                </form>
+            </div>
+        </div>
+    </div>
+</nav>
+
+<div class="orb orb-1"></div>
+<div class="orb orb-2"></div>
+
+<div class="wrapper">
+
+    <a href="/" class="back-link">← Back to home</a>
+
+    <div class="page-header">
+        <h1 class="page-title">Resume History</h1>
+        <p class="page-subtitle">Your previously tailored resumes, ready to download again.</p>
+
+        <span class="count-badge" th:text="${history.size() + ' resume' + (history.size() != 1 ? 's' : '')}">
+            0 resumes
+        </span>
+    </div>
+
+    <div th:if="${#lists.isEmpty(history)}" class="card empty-state">
+        <div class="empty-icon">
+            <svg xmlns="http://www.w3.org/2000/svg" width="28" height="28" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><polyline points="14 2 14 8 20 8"/><line x1="16" y1="13" x2="8" y2="13"/><line x1="16" y1="17" x2="8" y2="17"/></svg>
+        </div>
+        <h3>No resumes yet</h3>
+        <p>Tailor your first resume to see it here.</p>
+        <a href="/" class="btn-submit" style="max-width:200px; margin:0 auto;">Get started</a>
+    </div>
+
+    <div class="history-list" th:unless="${#lists.isEmpty(history)}">
+
+        <div class="hcard" th:each="entry : ${history}" th:data-id="${entry.id}">
+
+            <div class="hcard-header">
+                <div class="hcard-meta">
+                    <span class="hcard-date"
+                          th:text="${#temporals.format(entry.createdAt, 'MMM dd, yyyy')}">
+                        Apr 19, 2026
+                    </span>
+                    <span class="hcard-time"
+                          th:text="${#temporals.format(entry.createdAt, 'HH:mm')}">
+                        14:30
+                    </span>
+                </div>
+
+                <span class="hcard-format"
+                      th:classappend="${entry.format}"
+                      th:text="${entry.format?.toUpperCase()}">
+                    PDF
+                </span>
+            </div>
+
+            <div class="hcard-snippet" th:text="${entry.jobDescriptionSnippet}">
+                Job description snippet...
+            </div>
+
+            <div class="hcard-footer">
+                <a th:href="@{'/download/' + ${entry.pdfFilename}}"
+                   class="hcard-btn pdf"
+                   download>
+                    <svg xmlns="http://www.w3.org/2000/svg" width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/><polyline points="7 10 12 15 17 10"/><line x1="12" y1="15" x2="12" y2="3"/></svg>
+                    PDF
+                </a>
+
+                <a th:href="@{'/download/' + ${entry.docxFilename}}"
+                   class="hcard-btn docx"
+                   download>
+                    <svg xmlns="http://www.w3.org/2000/svg" width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/><polyline points="7 10 12 15 17 10"/><line x1="12" y1="15" x2="12" y2="3"/></svg>
+                    DOCX
+                </a>
+
+                <span class="hcard-spacer"></span>
+
+                <button class="hcard-btn view" onclick="toggleText(this)">
+                    <svg xmlns="http://www.w3.org/2000/svg" width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z"/><circle cx="12" cy="12" r="3"/></svg>
+                    View resume
+                </button>
+            </div>
+
+            <div class="hcard-text-panel">
+                <div class="hcard-text-header">
+                    <span class="hcard-text-label">Tailored resume</span>
+                    <button class="hcard-copy-btn" onclick="copyFromPanel(this)">Copy</button>
+                </div>
+                <div class="hcard-loading">Loading…</div>
+                <pre class="hcard-text-body" style="display:none;"></pre>
+            </div>
+
+        </div>
+
+    </div>
+
+</div>
+
+<script>
+    function toggleText(btn) {
+        const card = btn.closest('.hcard');
+        const panel = card.querySelector('.hcard-text-panel');
+        const isOpen = panel.classList.contains('open');
+
+        if (isOpen) {
+            panel.classList.remove('open');
+            btn.querySelector('svg').style.transform = '';
+            return;
+        }
+
+        panel.classList.add('open');
+        btn.querySelector('svg').style.transform = 'scale(1.2)';
+
+        const pre = panel.querySelector('.hcard-text-body');
+        if (pre.textContent.trim()) return;
+
+        const id = card.dataset.id;
+        const loading = panel.querySelector('.hcard-loading');
+
+        fetch('/history/' + id + '/text')
+            .then(r => {
+                if (!r.ok) throw new Error('Not found');
+                return r.text();
+            })
+            .then(text => {
+                pre.textContent = text;
+                pre.style.display = 'block';
+                loading.style.display = 'none';
+            })
+            .catch(() => {
+                loading.textContent = 'Could not load resume text.';
+            });
+    }
+
+    function copyFromPanel(btn) {
+        const pre = btn.closest('.hcard-text-panel').querySelector('.hcard-text-body');
+        const text = pre.textContent.trim();
+        if (!text) return;
+
+        navigator.clipboard.writeText(text).then(() => {
+            btn.textContent = '✓ Copied';
+            setTimeout(() => btn.textContent = 'Copy', 2000);
+        });
+    }
+</script>
+
+</body>
+</html>
