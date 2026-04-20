@@ -142,6 +142,33 @@
             </ol>
         </div>
 
+        <div class="changes-section" th:if="${changes != null and !#lists.isEmpty(changes)}">
+            <button class="changes-toggle" onclick="toggleChanges()" id="changesToggle">
+                <span class="changes-badge" th:text="${#lists.size(changes)}">0</span>
+                <span class="changes-toggle-label">Changes highlighted</span>
+                <span class="changes-chevron" id="changesChevron">▼</span>
+            </button>
+
+            <div class="changes-list" id="changesList">
+                <div class="change-card" th:each="change : ${changes}">
+                    <div class="change-diff">
+                        <div class="change-before">
+                            <span class="change-label">Before</span>
+                            <span th:text="${change.original}"></span>
+                        </div>
+                        <div class="change-after">
+                            <span class="change-label">After</span>
+                            <span th:text="${change.tailored}"></span>
+                        </div>
+                    </div>
+                    <div class="change-reason">
+                        <span class="reason-icon">💡</span>
+                        <span th:text="${change.reason}"></span>
+                    </div>
+                </div>
+            </div>
+        </div>
+
         <div class="panel">
             <div class="panel-header">
                 <span class="panel-title">✦ Tailored resume</span>
@@ -196,6 +223,11 @@
 
     function toggleGdocsTip() {
         document.getElementById('gdocsTip').classList.toggle('visible');
+    }
+
+    function toggleChanges() {
+        document.getElementById('changesList').classList.toggle('visible');
+        document.getElementById('changesChevron').classList.toggle('open');
     }
 </script>
 
