@@ -67,6 +67,13 @@ public class ResumeTailorController {
             return "index";
         }
 
+        long wordCount = jobDescription.trim().isEmpty() ? 0
+            : jobDescription.trim().split("\\s+").length;
+        if (wordCount > 3000) {
+            model.addAttribute("error", "Job description must not exceed 3,000 words (currently " + wordCount + ").");
+            return "index";
+        }
+
         TailorResponse response =
             resumeTailorService.tailorResume(resumeFile, jobDescription, outputFormat);
 

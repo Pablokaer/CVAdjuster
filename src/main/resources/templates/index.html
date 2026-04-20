@@ -160,7 +160,9 @@
                     <textarea name="jobDescription"
                               id="jobDescription"
                               placeholder="Paste the job description here..."
-                              required></textarea>
+                              required
+                              oninput="updateWordCount(this)"></textarea>
+                    <small id="jd-word-count" style="color: var(--text-muted, #888);">0 / 3,000 words</small>
                 </div>
 
                 <!--
@@ -206,6 +208,15 @@
 </div>
 
 <script>
+    function updateWordCount(textarea) {
+        const words = textarea.value.trim() === '' ? 0 : textarea.value.trim().split(/\s+/).length;
+        const counter = document.getElementById('jd-word-count');
+        counter.textContent = words.toLocaleString() + ' / 3,000 words';
+        counter.style.color = words > 3000 ? 'red' : 'var(--text-muted, #888)';
+        const submitBtn = textarea.closest('form').querySelector('[type="submit"]');
+        if (submitBtn) submitBtn.disabled = words > 3000;
+    }
+
     const fileInput = document.getElementById('resumeFile');
     const fileSelected = document.getElementById('fileSelected');
     const fileName = document.getElementById('fileName');
