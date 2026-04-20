@@ -4,7 +4,8 @@
       "Bash(psql *)",
       "Bash(where psql *)",
       "Read(//c/Program Files/PostgreSQL/**)",
-      "Bash(/c/Program Files/PostgreSQL/17/bin/psql.exe *)"
+      "Bash(/c/Program Files/PostgreSQL/17/bin/psql.exe *)",
+      "Bash(xargs cat *)"
     ]
   }
 }

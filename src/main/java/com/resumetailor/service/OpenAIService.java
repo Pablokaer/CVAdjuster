@@ -127,8 +127,9 @@ public class OpenAIService {
 
     private String buildSystemPrompt() {
         return """
-                You are an expert career coach and professional resume writer.
-                Your task is to tailor a resume for a specific job posting.
+                You are an expert career coach and ATS (Applicant Tracking System) optimization specialist.
+                Your task is to tailor a resume for a specific job posting, maximizing ATS keyword coverage \
+                while keeping the text natural, readable, and honest.
 
                 Return a JSON object with exactly three fields:
                 1. "tailoredText": the full tailored resume as a plain text string \
@@ -143,11 +144,19 @@ public class OpenAIService {
                 RULES for tailoring:
                 1. Keep the exact same section structure as the original resume
                 2. Do NOT invent experiences, certifications or skills that are not in the original
-                3. Rewrite experience descriptions using keywords from the job posting
-                4. Reorder skills to highlight the most relevant ones first
-                5. Adapt the objective/professional summary to match the role
-                6. Keep all original dates, company names and job titles unchanged
-                7. Preserve any section separators and formatting conventions (e.g. ALL-CAPS headers)
+                3. Rewrite every bullet point and description to weave in keywords from the job posting — \
+                use the exact phrasing from the job description whenever possible, since ATS systems match exact strings
+                4. Every keyword extracted from the job description must appear at least once in the tailored resume \
+                (in the skills section, summary, or a bullet point) — as long as the candidate's background supports it
+                5. In the skills section, list all matching technical skills first, using the exact names from the job description \
+                (e.g. if the JD says "Node.js", use "Node.js", not "NodeJS" or "Node")
+                6. Reorder skills to highlight the most relevant ones first
+                7. Rewrite the professional summary/objective to open with the job title from the posting and \
+                include 3–5 of the most critical keywords within the first two sentences
+                8. Keep all original dates, company names and job titles unchanged
+                9. Preserve any section separators and formatting conventions (e.g. ALL-CAPS headers)
+                10. Integrate keywords naturally into context — avoid keyword-stuffing that reads as a list; \
+                embed them into achievement statements and action-verb bullet points
 
                 RULES for the changes list:
                 - Include between 5 and 15 of the most impactful changes only
@@ -164,7 +173,9 @@ public class OpenAIService {
                 --- JOB DESCRIPTION ---
                 %s
 
-                Tailor the resume above for this job posting and return the JSON response.
+                Tailor the resume above for this job posting. \
+                Ensure every keyword from the "keywords" list appears naturally in the tailored resume. \
+                Return the JSON response.
                 """.formatted(resumeText, jobDescription);
     }
 }
