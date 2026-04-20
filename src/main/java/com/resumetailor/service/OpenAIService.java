@@ -157,6 +157,17 @@ public class OpenAIService {
                 9. Preserve any section separators and formatting conventions (e.g. ALL-CAPS headers)
                 10. Integrate keywords naturally into context — avoid keyword-stuffing that reads as a list; \
                 embed them into achievement statements and action-verb bullet points
+                
+                11. Whenever possible, convert responsibilities into achievement-based bullet points with measurable results (e.g., %, metrics, impact)
+                12. Match the resume tone and level of responsibility to the seniority of the job description
+                13. Prioritize the most critical and frequently mentioned requirements from the job posting
+                14. Use strong action verbs and avoid weak or passive language
+                15. Ensure consistency in verb tense, formatting, and terminology
+                16. De-emphasize less relevant experiences while keeping them
+                17. Avoid ATS-unfriendly formatting (tables, unusual symbols, graphics)
+                18. Reflect key skills within experience bullet points, not only in the skills section
+                19. Only include keywords that are genuinely supported by the candidate’s experience
+                20. Ensure the summary clearly communicates value, not just keywords
 
                 RULES for the changes list:
                 - Include between 5 and 15 of the most impactful changes only
