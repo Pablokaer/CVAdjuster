@@ -19,6 +19,7 @@
 
     <properties>
         <java.version>21</java.version>
+        <flyway.version>11.14.1</flyway.version>
     </properties>
 
     <dependencies>
@@ -134,6 +135,7 @@
         <dependency>
             <groupId>org.flywaydb</groupId>
             <artifactId>flyway-database-postgresql</artifactId>
+            <version>${flyway.version}</version>
         </dependency>
 
         <!-- Testes -->

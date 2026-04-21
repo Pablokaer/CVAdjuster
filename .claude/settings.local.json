@@ -6,7 +6,14 @@
       "Read(//c/Program Files/PostgreSQL/**)",
       "Bash(/c/Program Files/PostgreSQL/17/bin/psql.exe *)",
       "Bash(xargs cat *)",
-      "Bash(xargs grep *)"
+      "Bash(xargs grep *)",
+      "mcp__ide__getDiagnostics",
+      "Bash(./mvnw compile *)",
+      "Bash(mvn compile *)",
+      "Bash(java -version)",
+      "Read(//c/ProgramData/chocolatey/bin/**)",
+      "Read(//c/Users/Pablo/.m2/**)",
+      "Bash(/c/Users/Pablo/.m2/wrapper/dists/apache-maven-3.9.12-bin/5nmfsn99br87k5d4ajlekdq10k/apache-maven-3.9.12/bin/mvn compile *)"
     ]
   }
 }
