@@ -1,10 +1,12 @@
 package com.resumetailor.controller;
 
 import com.resumetailor.dto.TailorResponse;
+import com.resumetailor.exception.InsufficientCreditsException;
 import com.resumetailor.model.ResumeHistory;
 import com.resumetailor.repository.ResumeHistoryRepository;
 import com.resumetailor.repository.UserRepository;
 import com.resumetailor.service.ResumeTailorService;
+import com.resumetailor.service.UserService;
 import jakarta.servlet.http.HttpServletRequest;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
@@ -12,6 +14,7 @@ import org.springframework.http.HttpHeaders;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
+import org.springframework.security.core.Authentication;
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
 import org.springframework.web.bind.annotation.*;
@@ -29,11 +32,12 @@ public class ResumeTailorController {
     private final ResumeTailorService resumeTailorService;
     private final ResumeHistoryRepository historyRepository;
     private final UserRepository userRepository;
+    private final UserService userService;
 
     @GetMapping("/")
-    public String index(Model model, Principal principal) {
-        if (principal != null) {
-            model.addAttribute("user", principal.getName());
+    public String index(Model model, Authentication authentication) {
+        if (authentication != null && authentication.isAuthenticated()) {
+            model.addAttribute("user", UserService.extractEmail(authentication));
         }
         return "index";
     }
@@ -44,8 +48,10 @@ public class ResumeTailorController {
         @RequestParam("jobDescription") String jobDescription,
         @RequestParam(value = "outputFormat", defaultValue = "pdf") String outputFormat,
         HttpServletRequest httpRequest,
-        Principal principal,
+        Authentication authentication,
         Model model) {
+        // resolve email regardless of login type (form or Google OAuth2)
+        final String principal = UserService.extractEmail(authentication);
 
         log.info("Tailor request: file={}, format={}",
             resumeFile.getOriginalFilename(), outputFormat);
@@ -74,8 +80,28 @@ public class ResumeTailorController {
             return "index";
         }
 
+        // Deduct 1 credit before processing — refunded if AI fails
+        try {
+            userService.deductCredit(principal);
+        } catch (InsufficientCreditsException e) {
+            model.addAttribute("error", e.getMessage());
+            model.addAttribute("noCredits", true);
+            return "index";
+        }
+
         TailorResponse response =
             resumeTailorService.tailorResume(resumeFile, jobDescription, outputFormat);
+
+        if (!response.isSuccess()) {
+            // Refund the credit — user should not be charged for a failed attempt
+            userService.refundCredit(principal);
+        }
+
+        // Refresh credit balance so the result page shows the post-deduction value.
+        // GlobalModelAttributes runs before this handler, so we must override here.
+        if (principal != null) {
+            model.addAttribute("userCredits", userService.getCredits(principal));
+        }
 
         if (response.isSuccess()) {
 
@@ -111,7 +137,7 @@ public class ResumeTailorController {
                     ? jobDescription.substring(0, 180) + "…"
                     : jobDescription;
 
-                userRepository.findByEmail(principal.getName()).ifPresent(user -> {
+                userRepository.findByEmail(principal).ifPresent(user -> {
                     ResumeHistory entry = new ResumeHistory();
                     entry.setUser(user);
                     entry.setJobDescriptionSnippet(snippet);

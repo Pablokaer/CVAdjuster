@@ -22,4 +22,7 @@ public class User {
   private boolean emailVerified = true; // começa simples
 
   private String provider; // LOCAL, GOOGLE
+
+  @Column(nullable = false, columnDefinition = "integer default 0")
+  private int credits = 0;
 }
