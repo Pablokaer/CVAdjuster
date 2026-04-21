@@ -173,6 +173,46 @@ body::before {
     color: var(--error);
 }
 
+/* ── Credits badge ── */
+.credits-badge {
+    display: inline-flex;
+    align-items: center;
+    gap: 5px;
+    padding: 4px 10px;
+    background: rgba(124, 106, 247, 0.1);
+    border: 1px solid rgba(124, 106, 247, 0.22);
+    border-radius: 20px;
+    font-size: 12px;
+    font-weight: 600;
+    color: var(--accent);
+    white-space: nowrap;
+    cursor: default;
+}
+
+/* ── Add Credits button ── */
+.btn-add-credits {
+    padding: 5px 12px;
+    border: 1px solid var(--accent);
+    border-radius: 8px;
+    background: transparent;
+    color: var(--accent);
+    font-family: 'DM Sans', sans-serif;
+    font-size: 12px;
+    font-weight: 600;
+    text-decoration: none;
+    cursor: pointer;
+    transition: all 0.2s;
+    display: inline-flex;
+    align-items: center;
+    gap: 4px;
+    white-space: nowrap;
+}
+.btn-add-credits:hover {
+    background: var(--accent);
+    color: white;
+    box-shadow: 0 2px 12px rgba(124,106,247,0.3);
+}
+
 /* Animations */
 @keyframes fadeDown {
     from { opacity: 0; transform: translateY(-12px); }
@@ -284,6 +324,29 @@ label span { color: var(--accent); margin-left: 3px; }
     border: 1px solid rgba(248,113,113,0.3);
     color: var(--error);
 }
+
+.alert-no-credits {
+    background: rgba(124,106,247,0.08);
+    border: 1px solid rgba(124,106,247,0.3);
+    color: var(--accent);
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    padding: 14px 18px;
+    border-radius: var(--radius);
+    margin-bottom: 24px;
+    font-size: 14px;
+    animation: fadeDown 0.4s ease both;
+}
+
+.alert-credits-link {
+    margin-left: auto;
+    color: var(--accent);
+    font-weight: 600;
+    text-decoration: none;
+    white-space: nowrap;
+}
+.alert-credits-link:hover { text-decoration: underline; }
 
 /* ── Auth page centering ── */
 .auth-wrapper {

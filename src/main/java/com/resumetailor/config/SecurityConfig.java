@@ -17,7 +17,9 @@ public class SecurityConfig {
                 .requestMatchers(
                     "/", "/login", "/register",
                     "/css/**", "/js/**", "/images/**",
-                    "/favicon.ico"
+                    "/favicon.ico",
+                    // Stripe webhook must be publicly accessible (called by Stripe servers)
+                    "/api/webhook/**"
                 ).permitAll()
                 .anyRequest().authenticated()
             )
