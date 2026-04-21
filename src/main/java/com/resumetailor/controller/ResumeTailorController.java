@@ -97,6 +97,12 @@ public class ResumeTailorController {
             userService.refundCredit(principal);
         }
 
+        // Refresh credit balance so the result page shows the post-deduction value.
+        // GlobalModelAttributes runs before this handler, so we must override here.
+        if (principal != null) {
+            model.addAttribute("userCredits", userService.getCredits(principal));
+        }
+
         if (response.isSuccess()) {
 
             String baseUrl = getBaseUrl(httpRequest);
