@@ -1,5 +1,9 @@
 package com.resumetailor.service;
 
+import com.resumetailor.dto.RegisterDTO;
+import com.resumetailor.event.UserRegisteredEvent;
+import java.util.Optional;
+import com.resumetailor.exception.EmailAlreadyRegisteredException;
 import com.resumetailor.exception.InsufficientCreditsException;
 import com.resumetailor.model.User;
 import com.resumetailor.payment.entity.CreditPlan;
@@ -7,6 +11,8 @@ import com.resumetailor.repository.UserRepository;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.security.core.Authentication;
+import org.springframework.context.ApplicationEventPublisher;
+import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.security.oauth2.client.authentication.OAuth2AuthenticationToken;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
@@ -17,6 +23,37 @@ import org.springframework.transaction.annotation.Transactional;
 public class UserService {
 
     private final UserRepository userRepository;
+    private final PasswordEncoder passwordEncoder;
+    private final ApplicationEventPublisher eventPublisher;
+
+    // ── registration ──────────────────────────────────────────────────────────
+
+    /**
+     * Validates, persists, and returns a new LOCAL user.
+     * Throws EmailAlreadyRegisteredException before touching the database
+     * so the caller can redirect to the form without a constraint violation.
+     *
+     * The welcome email must be sent by the caller AFTER this method returns,
+     * ensuring the transaction has committed before any notification is dispatched.
+     */
+    @Transactional
+    public User register(RegisterDTO dto) {
+        if (userRepository.findByEmail(dto.getEmail()).isPresent()) {
+            throw new EmailAlreadyRegisteredException(dto.getEmail());
+        }
+        User user = new User();
+        user.setEmail(dto.getEmail());
+        user.setPassword(passwordEncoder.encode(dto.getPassword()));
+        user.setProvider("LOCAL");
+        user.setCredits(0);
+        User saved = userRepository.save(user);
+        log.info("Registered new local user: {}", saved.getEmail());
+        // Published inside @Transactional — the AFTER_COMMIT listener fires only
+        // when this transaction actually commits, so the welcome email is never
+        // sent for a registration that was rolled back.
+        eventPublisher.publishEvent(new UserRegisteredEvent(saved));
+        return saved;
+    }
 
     /**
      * Extrai o email do usuário independente do tipo de autenticação.
@@ -57,14 +94,17 @@ public class UserService {
 
     /**
      * Atomically adds the given number of credits to the user.
-     * Called by the payment webhook after a successful checkout.
+     * Returns the updated User so the caller can act on the new balance
+     * (e.g. send a purchase confirmation email) without a second DB round-trip.
+     * Returns empty if no user with the given ID exists.
      */
     @Transactional
-    public void addCredits(Long userId, int amount) {
-        userRepository.findById(userId).ifPresent(user -> {
+    public Optional<User> addCredits(Long userId, int amount) {
+        return userRepository.findById(userId).map(user -> {
             user.setCredits(user.getCredits() + amount);
-            userRepository.save(user);
-            log.info("Added {} credits to user {} (new balance: {})", amount, userId, user.getCredits());
+            User saved = userRepository.save(user);
+            log.info("Added {} credits to userId={} (new balance: {})", amount, userId, saved.getCredits());
+            return saved;
         });
     }
 

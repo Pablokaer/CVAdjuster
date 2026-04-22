@@ -25,9 +25,9 @@ public enum CreditPlan {
 
     // ── Planos disponíveis ────────────────────────────────────────────────
     //         label       créditos  centavos  moeda   destaque
-    STARTER ("Starter",      5,       199L,   "usd",   false),
-    PRO     ("Pro",         20,      1499L,   "usd",   true ),
-    PREMIUM ("Premium",     50,      2999L,   "usd",   false);
+    STARTER ("Starter",      2,       199L,   "eur",   false),
+    PRO     ("Pro",         8,      599L,   "eur",   true ),
+    PREMIUM ("Premium",     20,      999L,   "eur",   false);
     // ─────────────────────────────────────────────────────────────────────
 
     // ── Custo de cada geração de currículo ────────────────────────────────
@@ -47,14 +47,14 @@ public enum CreditPlan {
         return creditsToAdd / CREDITS_PER_RESUME;
     }
 
-    /** Custo em dólar por currículo gerado com este plano. Ex.: "$0.40" */
+    /** Custo em euro por currículo gerado com este plano. Ex.: "€0.40" */
     public String getCostPerResume() {
-        return String.format("$%.2f per resume", (amount / 100.0) / getResumesIncluded());
+        return String.format("€%.2f per resume", (amount / 100.0) / getResumesIncluded());
     }
 
-    /** Preço formatado para exibição. Ex.: "$14.99" */
+    /** Preço formatado para exibição. Ex.: "€14.99" */
     public String getDisplayPrice() {
-        return String.format("$%.2f", amount / 100.0);
+        return String.format("€%.2f", amount / 100.0);
     }
 
     /** Nome enviado ao Stripe na criação da sessão. */

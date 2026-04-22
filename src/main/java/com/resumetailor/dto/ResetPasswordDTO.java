@@ -1,18 +1,20 @@
 package com.resumetailor.dto;
 
-import jakarta.validation.constraints.Email;
 import jakarta.validation.constraints.NotBlank;
 import jakarta.validation.constraints.Size;
 import lombok.Data;
 
 @Data
-public class RegisterDTO {
+public class ResetPasswordDTO {
 
-    @Email(message = "Please enter a valid email address.")
-    @NotBlank(message = "Email is required.")
-    private String email;
+    // Carried as a hidden field in the reset-password form
+    @NotBlank
+    private String token;
 
     @NotBlank(message = "Password is required.")
     @Size(min = 8, message = "Password must be at least 8 characters.")
     private String password;
+
+    @NotBlank(message = "Please confirm your password.")
+    private String confirmPassword;
 }

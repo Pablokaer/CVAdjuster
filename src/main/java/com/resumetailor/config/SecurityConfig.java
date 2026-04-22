@@ -16,6 +16,7 @@ public class SecurityConfig {
             .authorizeHttpRequests(auth -> auth
                 .requestMatchers(
                     "/", "/login", "/register",
+                    "/forgot-password", "/reset-password", "/reset-password-success",
                     "/css/**", "/js/**", "/images/**",
                     "/favicon.ico",
                     // Stripe webhook must be publicly accessible (called by Stripe servers)

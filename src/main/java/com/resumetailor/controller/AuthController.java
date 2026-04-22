@@ -1,60 +1,60 @@
 package com.resumetailor.controller;
 
 import com.resumetailor.dto.RegisterDTO;
+import com.resumetailor.exception.EmailAlreadyRegisteredException;
 import com.resumetailor.model.User;
-import com.resumetailor.repository.UserRepository;
+import com.resumetailor.service.UserService;
 import jakarta.servlet.ServletException;
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
-import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
-import org.springframework.web.bind.annotation.*;
+import org.springframework.web.bind.annotation.GetMapping;
+import org.springframework.web.bind.annotation.ModelAttribute;
+import org.springframework.web.bind.annotation.PostMapping;
 
 @Slf4j
 @Controller
 @RequiredArgsConstructor
 public class AuthController {
 
-  private final UserRepository repository;
-  private final PasswordEncoder passwordEncoder;
+    private final UserService userService;
 
-  @GetMapping("/login")
-  public String login() {
-    return "login";
-  }
-
-  @GetMapping("/register")
-  public String registerPage(Model model) {
-    model.addAttribute("user", new RegisterDTO());
-    return "register";
-  }
-
-  @PostMapping("/register")
-  public String register(
-      @ModelAttribute("user") @Valid RegisterDTO dto,
-      HttpServletRequest request
-  ) {
-
-    if (repository.findByEmail(dto.getEmail()).isPresent()) {
-      return "redirect:/register?error";
+    @GetMapping("/login")
+    public String login() {
+        return "login";
     }
 
-    User user = new User();
-    user.setEmail(dto.getEmail());
-    user.setPassword(passwordEncoder.encode(dto.getPassword()));
-    user.setProvider("LOCAL");
-
-    repository.save(user);
-
-    try {
-      request.login(dto.getEmail(), dto.getPassword());
-    } catch (ServletException e) {
-      log.error("Auto-login failed after registration for {}", dto.getEmail(), e);
+    @GetMapping("/register")
+    public String registerPage(Model model) {
+        model.addAttribute("user", new RegisterDTO());
+        return "register";
     }
 
-    return "redirect:/";
-  }
+    @PostMapping("/register")
+    public String register(
+            @ModelAttribute("user") @Valid RegisterDTO dto,
+            Model model,
+            HttpServletRequest request
+    ) {
+        User saved;
+        try {
+            saved = userService.register(dto);
+            // UserService publishes UserRegisteredEvent inside its @Transactional boundary.
+            // NotificationEventListener fires the welcome email after commit — nothing to do here.
+        } catch (EmailAlreadyRegisteredException e) {
+            model.addAttribute("error", "This email is already registered. Please log in.");
+            return "register";
+        }
+
+        try {
+            request.login(dto.getEmail(), dto.getPassword());
+        } catch (ServletException e) {
+            log.error("Auto-login failed after registration for {}", dto.getEmail(), e);
+        }
+
+        return "redirect:/";
+    }
 }
