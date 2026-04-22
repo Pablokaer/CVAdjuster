@@ -1,5 +1,7 @@
 package com.resumetailor.controller;
 
+import com.resumetailor.exception.EmailAlreadyRegisteredException;
+import com.resumetailor.exception.InvalidTokenException;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.http.HttpStatus;
 import org.springframework.security.core.AuthenticationException;
@@ -14,6 +16,19 @@ import org.springframework.web.servlet.resource.NoResourceFoundException;
 @Slf4j
 @ControllerAdvice
 public class GlobalExceptionHandler {
+
+    @ExceptionHandler(InvalidTokenException.class)
+    public String handleInvalidToken(InvalidTokenException e) {
+        log.warn("Invalid reset token attempt: {}", e.getMessage());
+        return "redirect:/forgot-password?invalid";
+    }
+
+    @ExceptionHandler(EmailAlreadyRegisteredException.class)
+    public String handleEmailAlreadyRegistered(EmailAlreadyRegisteredException e, Model model) {
+        log.warn("Registration rejected — duplicate email: {}", e.getMessage());
+        model.addAttribute("error", "This email is already registered. Please log in.");
+        return "register";
+    }
 
     @ExceptionHandler(MaxUploadSizeExceededException.class)
     public String handleMaxUploadSize(MaxUploadSizeExceededException e, Model model) {
