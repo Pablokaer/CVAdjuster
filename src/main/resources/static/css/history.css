@@ -16,7 +16,7 @@
 }
 
 .page-title {
-    font-family: 'Syne', sans-serif;
+    font-family: 'Epilogue', sans-serif;
     font-size: clamp(26px, 4vw, 40px);
     font-weight: 800;
     letter-spacing: -0.02em;
@@ -41,7 +41,7 @@
     font-weight: 600;
     padding: 4px 12px;
     border-radius: 999px;
-    font-family: 'Syne', sans-serif;
+    font-family: 'Epilogue', sans-serif;
     letter-spacing: 0.04em;
 }
 
@@ -66,7 +66,7 @@
 }
 
 .empty-state h3 {
-    font-family: 'Syne', sans-serif;
+    font-family: 'Epilogue', sans-serif;
     font-size: 18px;
     font-weight: 700;
     margin-bottom: 8px;
@@ -115,7 +115,7 @@
 }
 
 .hcard-date {
-    font-family: 'Syne', sans-serif;
+    font-family: 'Epilogue', sans-serif;
     font-size: 13px;
     font-weight: 700;
     color: var(--text);
@@ -132,7 +132,7 @@
     gap: 4px;
     font-size: 11px;
     font-weight: 700;
-    font-family: 'Syne', sans-serif;
+    font-family: 'Epilogue', sans-serif;
     letter-spacing: 0.06em;
     padding: 3px 10px;
     border-radius: 999px;
@@ -168,7 +168,7 @@
     gap: 6px;
     font-size: 12px;
     font-weight: 600;
-    font-family: 'DM Sans', sans-serif;
+    font-family: 'Figtree', sans-serif;
     padding: 7px 12px;
     border-radius: 8px;
     border: none;
@@ -205,7 +205,7 @@
 }
 
 .hcard-text-label {
-    font-family: 'Syne', sans-serif;
+    font-family: 'Epilogue', sans-serif;
     font-size: 11px;
     font-weight: 700;
     letter-spacing: 0.07em;
@@ -221,7 +221,7 @@
     padding: 4px 10px;
     border-radius: 6px;
     cursor: pointer;
-    font-family: 'DM Sans', sans-serif;
+    font-family: 'Figtree', sans-serif;
     transition: all 0.2s;
 }
 .hcard-copy-btn:hover { border-color: var(--accent); color: var(--accent); }

@@ -8,7 +8,8 @@
     <title>Add Credits — Fit My CV</title>
 
     <link rel="preconnect" href="https://fonts.googleapis.com">
-    <link href="https://fonts.googleapis.com/css2?family=Syne:wght@400;600;700&family=DM+Sans:wght@300;400;500&display=swap" rel="stylesheet">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Epilogue:wght@400;500;600;700;800&family=Figtree:wght@300;400;500;600;700&display=swap" rel="stylesheet">
 
     <link rel="icon" type="image/png" th:href="@{/favicon.png}">
     <link rel="stylesheet" th:href="@{/css/base.css}">
@@ -96,14 +97,13 @@
 
             <div class="plan-name" th:text="${plan.displayName}">Plan</div>
 
-            <div class="plan-credits">
+            <div class="plan-credits-group">
                 <span class="credits-number" th:text="${plan.creditsToAdd}">0</span>
                 <span class="credits-unit">credits</span>
+                <span class="plan-resumes">= <span th:text="${plan.resumesIncluded}">0</span> resumes</span>
             </div>
 
-            <div class="plan-resumes">
-                = <span th:text="${plan.resumesIncluded}">0</span> resumes
-            </div>
+            <div class="plan-divider"></div>
 
             <div class="plan-price" th:text="${plan.displayPrice}">$0.00</div>
             <div class="plan-per"   th:text="${plan.costPerResume}">$0.00 per resume</div>

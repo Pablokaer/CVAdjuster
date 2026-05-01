@@ -18,7 +18,7 @@
 body {
     background: var(--bg);
     color: var(--text);
-    font-family: 'DM Sans', sans-serif;
+    font-family: 'Figtree', sans-serif;
     min-height: 100vh;
     overflow-x: hidden;
 }
@@ -58,14 +58,14 @@ body::before {
     max-width: 1100px;
     margin: 0 auto;
     padding: 0 24px;
-    height: 45px;
+    height: 52px;
     display: flex;
     align-items: center;
     justify-content: space-between;
 }
 
 .topbar-brand {
-    font-family: 'Syne', sans-serif;
+    font-family: 'Epilogue', sans-serif;
     font-weight: 700;
     font-size: 17px;
     letter-spacing: -0.02em;
@@ -94,7 +94,7 @@ body::before {
     border-radius: 8px;
     background: transparent;
     color: var(--text-muted);
-    font-family: 'DM Sans', sans-serif;
+    font-family: 'Figtree', sans-serif;
     font-size: 13px;
     font-weight: 500;
     text-decoration: none;
@@ -116,7 +116,7 @@ body::before {
     border-radius: 8px;
     background: linear-gradient(135deg, var(--accent), #9c84f7);
     color: white;
-    font-family: 'DM Sans', sans-serif;
+    font-family: 'Figtree', sans-serif;
     font-size: 13px;
     font-weight: 600;
     text-decoration: none;
@@ -162,7 +162,7 @@ body::before {
     border-radius: 8px;
     background: transparent;
     color: var(--text-muted);
-    font-family: 'DM Sans', sans-serif;
+    font-family: 'Figtree', sans-serif;
     font-size: 12px;
     font-weight: 500;
     cursor: pointer;
@@ -196,7 +196,7 @@ body::before {
     border-radius: 8px;
     background: transparent;
     color: var(--accent);
-    font-family: 'DM Sans', sans-serif;
+    font-family: 'Figtree', sans-serif;
     font-size: 12px;
     font-weight: 600;
     text-decoration: none;
@@ -232,7 +232,7 @@ input[type="text"] {
     border: 1px solid var(--border);
     border-radius: var(--radius);
     color: var(--text);
-    font-family: 'DM Sans', sans-serif;
+    font-family: 'Figtree', sans-serif;
     font-size: 14px;
     padding: 12px 14px;
     width: 100%;
@@ -265,7 +265,7 @@ input::placeholder { color: var(--text-muted); }
 
 /* ── Field labels ── */
 label {
-    font-family: 'Syne', sans-serif;
+    font-family: 'Epilogue', sans-serif;
     font-size: 12px;
     font-weight: 600;
     letter-spacing: 0.06em;
@@ -283,7 +283,7 @@ label span { color: var(--accent); margin-left: 3px; }
     border: none;
 
     border-radius: 8px;
-    font-family: 'Syne', sans-serif;
+    font-family: 'Epilogue', sans-serif;
     font-size: 15px;
     font-weight: 700;
     letter-spacing: 0.02em;
@@ -380,7 +380,7 @@ label span { color: var(--accent); margin-left: 3px; }
     margin: 20px 0;
     color: var(--text-muted);
     font-size: 12px;
-    font-family: 'DM Sans', sans-serif;
+    font-family: 'Figtree', sans-serif;
     text-transform: none;
     letter-spacing: 0;
     font-weight: 400;
@@ -407,7 +407,7 @@ label span { color: var(--accent); margin-left: 3px; }
     border-radius: var(--radius);
     background: var(--surface-2);
     color: var(--text);
-    font-family: 'DM Sans', sans-serif;
+    font-family: 'Figtree', sans-serif;
     font-size: 14px;
     font-weight: 500;
     text-decoration: none;

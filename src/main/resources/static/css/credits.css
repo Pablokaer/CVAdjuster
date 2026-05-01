@@ -4,7 +4,7 @@
 .wrapper {
     position: relative;
     z-index: 1;
-    max-width: 860px;
+    max-width: 960px;
     margin: 0 auto;
     padding: 80px 24px 60px;
 }
@@ -15,7 +15,7 @@
     gap: 6px;
     color: var(--text-muted);
     text-decoration: none;
-    font-size: 13px;
+    font-size: 14px;
     margin-bottom: 40px;
     transition: color 0.2s;
 }
@@ -34,7 +34,7 @@
     background: rgba(124,106,247,0.12);
     border: 1px solid rgba(124,106,247,0.25);
     border-radius: 20px;
-    font-size: 12px;
+    font-size: 13px;
     font-weight: 600;
     color: var(--accent);
     letter-spacing: 0.04em;
@@ -42,7 +42,7 @@
 }
 
 .credits-header h1 {
-    font-family: 'Syne', sans-serif;
+    font-family: 'Epilogue', sans-serif;
     font-size: clamp(28px, 5vw, 42px);
     font-weight: 700;
     line-height: 1.1;
@@ -52,7 +52,7 @@
 
 .credits-header .subtitle {
     color: var(--text-muted);
-    font-size: 15px;
+    font-size: 16px;
     line-height: 1.6;
     margin-bottom: 28px;
 }
@@ -65,40 +65,42 @@
     background: var(--surface);
     border: 1px solid var(--border);
     border-radius: 12px;
-    font-size: 14px;
+    font-size: 15px;
 }
 
 .balance-label { color: var(--text-muted); }
 
 .balance-value {
-    font-family: 'Syne', sans-serif;
-    font-size: 22px;
+    font-family: 'Epilogue', sans-serif;
+    font-size: 23px;
     font-weight: 700;
     color: var(--accent);
 }
 
-.balance-unit { color: var(--text-muted); font-size: 13px; }
+.balance-unit { color: var(--text-muted); font-size: 14px; }
 
 /* ── Pricing grid ── */
 .pricing-grid {
     display: grid;
-    grid-template-columns: repeat(auto-fit, minmax(220px, 1fr));
-    gap: 20px;
+    grid-template-columns: repeat(auto-fit, minmax(240px, 1fr));
+    gap: 24px;
     margin-bottom: 40px;
     animation: fadeUp 0.5s ease 0.1s both;
+    justify-items: center;
 }
 
 .plan-card {
     position: relative;
     background: var(--surface);
     border: 1px solid var(--border);
-    border-radius: 20px;
-    padding: 32px 24px;
+    border-radius: 24px;
+    padding: 36px 28px 28px;
     display: flex;
     flex-direction: column;
     align-items: center;
     text-align: center;
-    gap: 10px;
+    gap: 6px;
+    width: 100%;
     transition: border-color 0.2s, box-shadow 0.2s, transform 0.2s;
 }
 
@@ -122,7 +124,7 @@
     padding: 3px 14px;
     background: linear-gradient(135deg, var(--accent), #9c84f7);
     border-radius: 20px;
-    font-size: 11px;
+    font-size: 12px;
     font-weight: 700;
     color: white;
     letter-spacing: 0.04em;
@@ -132,49 +134,60 @@
 .plan-icon { font-size: 28px; margin-bottom: 4px; }
 
 .plan-name {
-    font-family: 'Syne', sans-serif;
-    font-size: 18px;
+    font-family: 'Epilogue', sans-serif;
+    font-size: 19px;
     font-weight: 700;
     color: var(--text);
 }
 
-.plan-credits {
+.plan-credits-group {
     display: flex;
-    align-items: baseline;
-    gap: 5px;
+    flex-direction: column;
+    align-items: center;
+    gap: 3px;
+    margin: 8px 0 4px;
 }
 
 .credits-number {
-    font-family: 'Syne', sans-serif;
-    font-size: 40px;
+    font-family: 'Figtree', sans-serif;
+    font-size: 53px;
     font-weight: 700;
     color: var(--accent);
     line-height: 1;
 }
 
 .credits-unit {
-    font-size: 14px;
+    font-size: 12px;
+    font-weight: 600;
     color: var(--text-muted);
+    text-transform: uppercase;
+    letter-spacing: 0.1em;
 }
 
 .plan-resumes {
-    font-size: 12px;
+    font-size: 13px;
     color: var(--text-muted);
-    margin-top: -4px;
+    margin-top: 2px;
+}
+
+.plan-divider {
+    width: 36px;
+    height: 1px;
+    background: var(--border);
+    margin: 10px auto;
 }
 
 .plan-price {
-    font-family: 'Syne', sans-serif;
-    font-size: 24px;
+    font-family: 'Epilogue', sans-serif;
+    font-size: 27px;
     font-weight: 700;
     color: var(--text);
-    margin-top: 6px;
 }
 
 .plan-per {
-    font-size: 12px;
+    font-size: 13px;
     color: var(--text-muted);
-    margin-bottom: 8px;
+    margin-bottom: 12px;
 }
 
 .btn-buy {
@@ -184,8 +197,8 @@
     border-radius: 10px;
     background: transparent;
     color: var(--accent);
-    font-family: 'Syne', sans-serif;
-    font-size: 14px;
+    font-family: 'Epilogue', sans-serif;
+    font-size: 15px;
     font-weight: 700;
     cursor: pointer;
     transition: all 0.2s;
@@ -216,7 +229,7 @@
     align-items: center;
     justify-content: center;
     gap: 8px;
-    font-size: 12px;
+    font-size: 13px;
     color: var(--text-muted);
     text-align: center;
     animation: fadeUp 0.5s ease 0.2s both;
@@ -234,7 +247,7 @@
     gap: 10px;
     padding: 12px 20px;
     border-radius: 10px;
-    font-size: 14px;
+    font-size: 15px;
     font-weight: 500;
     animation: fadeDown 0.4s ease both;
     transition: opacity 0.4s, transform 0.4s;
@@ -285,7 +298,7 @@
 
 .redirect-text {
     color: var(--text-muted);
-    font-size: 14px;
+    font-size: 15px;
 }
 
 @media (max-width: 600px) {

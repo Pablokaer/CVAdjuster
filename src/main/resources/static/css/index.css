@@ -67,7 +67,7 @@ header {
 .badge::before { content: '✦'; font-size: 10px; }
 
 h1 {
-  font-family: 'Syne', sans-serif;
+  font-family: 'Epilogue', sans-serif;
   font-size: clamp(36px, 6vw, 64px);
   font-weight: 800;
   line-height: 1.05;
@@ -75,10 +75,7 @@ h1 {
   margin-bottom: 16px;
 }
 h1 .highlight {
-  background: linear-gradient(135deg, var(--accent-1) 0%, #c084fc 50%, var(--accent-2) 100%);
-  -webkit-background-clip: text;
-  -webkit-text-fill-color: transparent;
-  background-clip: text;
+  color: var(--accent-2);
 }
 
 .subtitle {
@@ -114,7 +111,7 @@ h1 .highlight {
   font-size: 15px;
   font-weight: 600;
   display: flex; align-items: center; justify-content: center;
-  font-family: 'Syne', sans-serif;
+  font-family: 'Epilogue', sans-serif;
 }
 .step:not(:last-child)::after {
   content: '→';
@@ -280,7 +277,7 @@ label {
   color: rgba(255,255,255,.75);
   letter-spacing: .2px;
   text-transform: none;
-  font-family: 'DM Sans', sans-serif;
+  font-family: 'Figtree', sans-serif;
   /*font-weight: 400;*/
 }
 
@@ -296,7 +293,7 @@ textarea {
   background: rgba(10,10,16,.35);
   outline: none;
   box-shadow: 0 10px 35px rgba(0,0,0,.25);
-  font-family: 'DM Sans', sans-serif;
+  font-family: 'Figtree', sans-serif;
   line-height: 1.6;
   width: 100%;
   transition: border-color .2s, box-shadow .2s;
@@ -424,7 +421,7 @@ textarea:focus {
 }
 
 .loading-text {
-  font-family: 'Syne', sans-serif;
+  font-family: 'Epilogue', sans-serif;
   font-size: 16px;
   color: rgba(255,255,255,.62);
 }

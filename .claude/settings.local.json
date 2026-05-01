@@ -13,7 +13,11 @@
       "Bash(java -version)",
       "Read(//c/ProgramData/chocolatey/bin/**)",
       "Read(//c/Users/Pablo/.m2/**)",
-      "Bash(/c/Users/Pablo/.m2/wrapper/dists/apache-maven-3.9.12-bin/5nmfsn99br87k5d4ajlekdq10k/apache-maven-3.9.12/bin/mvn compile *)"
+      "Bash(/c/Users/Pablo/.m2/wrapper/dists/apache-maven-3.9.12-bin/5nmfsn99br87k5d4ajlekdq10k/apache-maven-3.9.12/bin/mvn compile *)",
+      "WebSearch",
+      "WebFetch(domain:impeccable.style)",
+      "Bash(npx skills *)",
+      "Bash(node .agents/skills/impeccable/scripts/cleanup-deprecated.mjs)"
     ]
   }
 }
