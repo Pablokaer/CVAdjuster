@@ -30,9 +30,9 @@
     <h2 style="font-family:'Epilogue',sans-serif; font-weight:700; font-size:22px; margin-bottom:6px;">Create account</h2>
     <p style="color:var(--text-muted); font-size:14px; margin-bottom:24px; text-transform:none; letter-spacing:0; font-family:'Figtree',sans-serif;">Start tailoring your resume with AI</p>
 
-    <div th:if="${param.error}" class="alert alert-error">
+    <div th:if="${error}" class="alert alert-error">
       <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="10"/><line x1="12" y1="8" x2="12" y2="12"/><line x1="12" y1="16" x2="12.01" y2="16"/></svg>
-      This email is already registered
+      <span th:text="${error}"></span>
     </div>
 
     <form th:action="@{/register}" method="post" th:object="${user}">
