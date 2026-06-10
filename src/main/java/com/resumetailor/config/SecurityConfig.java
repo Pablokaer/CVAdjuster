@@ -16,7 +16,7 @@ public class SecurityConfig {
         http
             .authorizeHttpRequests(auth -> auth
                 .requestMatchers(
-                    "/", "/login", "/register",
+                    "/", "/login", "/register", "/about",
                     "/forgot-password", "/reset-password", "/reset-password-success",
                     "/css/**", "/js/**", "/images/**",
                     "/favicon.ico",

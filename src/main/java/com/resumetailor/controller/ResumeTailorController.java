@@ -42,6 +42,14 @@ public class ResumeTailorController {
         return "index";
     }
 
+    @GetMapping("/about")
+    public String about(Model model, Authentication authentication) {
+        if (authentication != null && authentication.isAuthenticated()) {
+            model.addAttribute("user", UserService.extractEmail(authentication));
+        }
+        return "about";
+    }
+
     @PostMapping("/tailor")
     public String tailorResume(
         @RequestParam("resumeFile") MultipartFile resumeFile,

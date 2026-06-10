@@ -1,0 +1,172 @@
+<!DOCTYPE html>
+<html lang="en" xmlns:th="http://www.thymeleaf.org">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>About — CV FIT AI</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Epilogue:wght@400;500;600;700;800&family=Figtree:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+  <link rel="stylesheet" th:href="@{/css/base.css}">
+  <link rel="stylesheet" th:href="@{/css/index.css}">
+  <style>
+    .about-section {
+      margin: 42px 0;
+    }
+    .about-section h3 {
+      font-size: 20px;
+      font-weight: 600;
+      color: rgba(255,255,255,.92);
+      margin: 28px 0 14px;
+      letter-spacing: -0.01em;
+    }
+    .about-section:first-of-type h3 {
+      margin-top: 0;
+    }
+    .about-section p {
+      color: rgba(255,255,255,.75);
+      line-height: 1.7;
+      margin: 14px 0;
+      font-size: 15px;
+    }
+    .about-section ul {
+      list-style: none;
+      padding: 0;
+      margin: 16px 0;
+    }
+    .about-section li {
+      color: rgba(255,255,255,.75);
+      margin: 12px 0;
+      padding-left: 24px;
+      position: relative;
+      line-height: 1.6;
+      font-size: 15px;
+    }
+    .about-section li::before {
+      content: '→';
+      position: absolute;
+      left: 0;
+      color: var(--accent-1);
+      font-weight: 600;
+    }
+    .about-section li strong {
+      color: rgba(255,255,255,.92);
+    }
+    .cta-section {
+      margin-top: 48px;
+      display: flex;
+      gap: 12px;
+      flex-wrap: wrap;
+    }
+    .highlight-box {
+      background: rgba(124,92,255,.08);
+      border-left: 3px solid var(--accent-1);
+      padding: 14px 14px;
+      margin: 16px 0;
+      border-radius: 8px;
+      font-size: 14px;
+      color: rgba(255,255,255,.80);
+    }
+  </style>
+</head>
+<body>
+
+<nav class="topbar">
+  <div class="topbar-inner">
+    <a href="/" class="topbar-brand">CV FIT AI</a>
+    <div class="topbar-actions">
+      <a href="/" class="btn-nav-outline">← Back to Home</a>
+    </div>
+  </div>
+</nav>
+
+<div class="wrapper">
+  <header>
+    <h1>About CV FIT AI</h1>
+    <p class="subtitle">Automatically tailor your resume to any job description using AI-powered analysis and intelligent keyword matching.</p>
+  </header>
+
+  <div class="card">
+    <div style="padding:34px;">
+
+      <!-- What it does -->
+      <div class="about-section">
+        <h3>✦ What It Does</h3>
+        <p>CV FIT AI takes your resume (PDF or DOCX) and a job description, then uses advanced NLP and AI models to create a tailored version optimized for that specific role. The system:</p>
+        <ul>
+          <li>Reorganizes your experience to highlight the most relevant skills and achievements</li>
+          <li>Extracts and emphasizes keywords that match the job posting</li>
+          <li>Rewrites sections for better impact and ATS (Applicant Tracking System) optimization</li>
+          <li>Provides a summary of all changes made for your review</li>
+        </ul>
+      </div>
+
+      <!-- Requirements -->
+      <div class="about-section">
+        <h3>📋 What You Need to Provide (Inputs)</h3>
+        <ul>
+          <li><strong>Resume File:</strong> PDF or DOCX format • Maximum 10 MB • Must contain your work experience, education, and skills</li>
+          <li><strong>Job Description:</strong> The text from the job posting • Maximum 3,000 words • Paste the full posting for best results</li>
+          <li><strong>Output Format:</strong> Choose PDF or DOCX • Defaults to PDF but you can select either</li>
+          <li><strong>User Account:</strong> Optional for anonymous use • Required to save history and manage credits</li>
+        </ul>
+      </div>
+
+      <!-- Expected Output -->
+      <div class="about-section">
+        <h3>📦 What You'll Receive (Expected Output)</h3>
+        <ul>
+          <li><strong>Tailored Resume:</strong> Download in both PDF and DOCX formats instantly</li>
+          <li><strong>Changes Summary:</strong> A detailed breakdown of modifications, including rewritten sections and keyword additions</li>
+          <li><strong>Keyword Extraction:</strong> A list of important terms from the job description that now appear in your resume</li>
+          <li><strong>Version History:</strong> Saved in your account (if logged in) for future reference and comparison</li>
+          <li><strong>Google Docs Integration:</strong> View and edit your tailored resume directly in Google Docs</li>
+        </ul>
+      </div>
+
+      <!-- Credits System -->
+      <div class="about-section">
+        <h3>⚡ Credits & Pricing</h3>
+        <p>CV FIT AI operates on a credit-based system:</p>
+        <ul>
+          <li><strong>Cost per tailor:</strong> 1 credit per resume processing</li>
+          <li><strong>New accounts:</strong> Start with 1 free credit to test the service</li>
+          <li><strong>Purchase credits:</strong> Buy credit packages from the Credits page at any time</li>
+          <li><strong>No expiration:</strong> Credits never expire and can be used whenever you need</li>
+        </ul>
+        <div class="highlight-box">
+          💡 Pro tip: Save credits by refining your job descriptions. More specific descriptions lead to better results.
+        </div>
+      </div>
+
+      <!-- Recommendations -->
+      <div class="about-section">
+        <h3>⚠️ Best Practices & Limitations</h3>
+        <ul>
+          <li><strong>Security:</strong> Don't include sensitive information (ID numbers, passwords, bank details) in your job description</li>
+          <li><strong>Always review:</strong> Check the AI output manually before submitting applications—human verification is crucial</li>
+          <li><strong>Accuracy:</strong> While AI is powerful, it may occasionally modify dates or job titles—verify all details</li>
+          <li><strong>Context matters:</strong> More detailed job descriptions produce better-tailored resumes</li>
+          <li><strong>Keep originals:</strong> Always keep your original resume for reference and future use</li>
+        </ul>
+      </div>
+
+      <!-- Get Started -->
+      <div class="cta-section">
+        <a href="/" class="btn-submit" style="text-decoration: none;">← Back to Home</a>
+        <a href="/register" class="btn-nav-primary" style="text-decoration: none;">Create Account</a>
+      </div>
+
+    </div>
+  </div>
+
+  <footer style="text-align: center; margin-top: 48px; color: rgba(255,255,255,.30); font-size: 13px;">
+    Questions? <a href="/" style="color: rgba(124,92,255,.8); text-decoration: none;">Contact us</a> for support.
+  </footer>
+
+</div>
+
+</body>
+</html>
+
+
