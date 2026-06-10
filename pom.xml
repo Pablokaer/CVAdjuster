@@ -20,6 +20,8 @@
     <properties>
         <java.version>21</java.version>
         <flyway.version>11.14.1</flyway.version>
+        <!-- Ensure resource filtering and compilation use UTF-8 to avoid MalformedInputException -->
+        <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
     </properties>
 
     <dependencies>
@@ -138,6 +140,12 @@
             <version>${flyway.version}</version>
         </dependency>
 
+        <!-- Actuator (health, info) -->
+        <dependency>
+            <groupId>org.springframework.boot</groupId>
+            <artifactId>spring-boot-starter-actuator</artifactId>
+        </dependency>
+
         <!-- JavaMailSender (Gmail SMTP) -->
         <dependency>
             <groupId>org.springframework.boot</groupId>
@@ -153,7 +161,44 @@
     </dependencies>
 
     <build>
+        <!-- Do not filter resources during the build; properties files in this repo
+             contain non-ASCII characters saved in platform encoding and filtering
+             can fail inside minimal builder images. Filtering is not required here. -->
+        <resources>
+            <resource>
+                <directory>src/main/resources</directory>
+                <filtering>false</filtering>
+            </resource>
+        </resources>
         <plugins>
+            <!-- Ensure resources are processed with UTF-8 encoding -->
+            <plugin>
+                <groupId>org.apache.maven.plugins</groupId>
+                <artifactId>maven-resources-plugin</artifactId>
+                <version>3.3.1</version>
+                <configuration>
+                    <encoding>${project.build.sourceEncoding}</encoding>
+                    <!-- Avoid filtering .properties files (they often contain non-ASCII text);
+                         treat them as binary/text pass-through to prevent MalformedInputException
+                         when files are not encoded exactly as UTF-8 on the host. -->
+                    <nonFilteredFileExtensions>
+                        <nonFilteredFileExtension>properties</nonFilteredFileExtension>
+                    </nonFilteredFileExtensions>
+                </configuration>
+            </plugin>
+
+            <!-- Ensure Java compilation uses UTF-8 -->
+            <plugin>
+                <groupId>org.apache.maven.plugins</groupId>
+                <artifactId>maven-compiler-plugin</artifactId>
+                <version>3.11.0</version>
+                <configuration>
+                    <source>${java.version}</source>
+                    <target>${java.version}</target>
+                    <encoding>${project.build.sourceEncoding}</encoding>
+                </configuration>
+            </plugin>
+
             <plugin>
                 <groupId>org.springframework.boot</groupId>
                 <artifactId>spring-boot-maven-plugin</artifactId>

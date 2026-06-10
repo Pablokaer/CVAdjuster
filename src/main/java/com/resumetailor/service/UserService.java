@@ -45,7 +45,8 @@ public class UserService {
         user.setEmail(dto.getEmail());
         user.setPassword(passwordEncoder.encode(dto.getPassword()));
         user.setProvider("LOCAL");
-        user.setCredits(0);
+        // New accounts start with 1 credit by default
+        user.setCredits(1);
         User saved = userRepository.save(user);
         log.info("Registered new local user: {}", saved.getEmail());
         // Published inside @Transactional — the AFTER_COMMIT listener fires only
@@ -79,7 +80,8 @@ public class UserService {
             user.setEmail(email);
             user.setProvider("GOOGLE");
             user.setEmailVerified(true);
-            user.setCredits(0);
+            // New OAuth2-created accounts also start with 1 credit
+            user.setCredits(1);
             return userRepository.save(user);
         });
     }

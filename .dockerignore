@@ -1,0 +1,22 @@
+.mvn
+target
+**/target
+.idea
+.vscode
+*.iml
+.git
+.gitignore
+README.md
+
+# Local environment and secrets
+.env
+*.env
+
+# Maven local repository
+.m2
+
+# Logs and temp
+*.log
+*.tmp
+
+
