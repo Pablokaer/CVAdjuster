@@ -7,6 +7,7 @@ import com.resumetailor.repository.ResumeHistoryRepository;
 import com.resumetailor.repository.UserRepository;
 import com.resumetailor.service.ResumeTailorService;
 import com.resumetailor.service.UserService;
+import com.resumetailor.util.InputSanitizer;
 import jakarta.servlet.http.HttpServletRequest;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
@@ -22,7 +23,6 @@ import org.springframework.web.multipart.MultipartFile;
 
 import java.io.IOException;
 import java.net.URI;
-import java.security.Principal;
 
 @Slf4j
 @Controller
@@ -81,8 +81,17 @@ public class ResumeTailorController {
             return "index";
         }
 
-        long wordCount = jobDescription.trim().isEmpty() ? 0
-            : jobDescription.trim().split("\\s+").length;
+        // Heuristic detection for prompt-injection and sanitization
+        if (InputSanitizer.containsPromptInjection(jobDescription)) {
+            model.addAttribute("error", "Job description contains disallowed instructions or suspicious content. Please provide only the job posting text without commands or code.");
+            return "index";
+        }
+
+        // Sanitize the input and enforce the same word limit the application expects
+        String sanitizedJobDescription = InputSanitizer.sanitizeJobDescription(jobDescription);
+
+        long wordCount = sanitizedJobDescription.trim().isEmpty() ? 0
+            : sanitizedJobDescription.trim().split("\\s+").length;
         if (wordCount > 3000) {
             model.addAttribute("error", "Job description must not exceed 3,000 words (currently " + wordCount + ").");
             return "index";
@@ -98,7 +107,8 @@ public class ResumeTailorController {
         }
 
         TailorResponse response =
-            resumeTailorService.tailorResume(resumeFile, jobDescription, outputFormat);
+            // pass sanitized text to the tailoring service to avoid injecting raw content into prompts
+            resumeTailorService.tailorResume(resumeFile, sanitizedJobDescription, outputFormat);
 
         if (!response.isSuccess()) {
             // Refund the credit — user should not be charged for a failed attempt
@@ -141,9 +151,9 @@ public class ResumeTailorController {
             if (principal != null) {
                 final String finalPdfUrl  = pdfUrl;
                 final String finalDocxUrl = docxUrl;
-                final String snippet = jobDescription.length() > 180
-                    ? jobDescription.substring(0, 180) + "…"
-                    : jobDescription;
+                final String snippet = sanitizedJobDescription.length() > 180
+                    ? sanitizedJobDescription.substring(0, 180) + "…"
+                    : sanitizedJobDescription;
 
                 userRepository.findByEmail(principal).ifPresent(user -> {
                     ResumeHistory entry = new ResumeHistory();
