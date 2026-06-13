@@ -28,10 +28,11 @@ services:
       - MAIL_USERNAME=${MAIL_USERNAME}
       - MAIL_APP_PASSWORD=${MAIL_APP_PASSWORD}
       - APP_BASE_URL=${APP_BASE_URL}
+      - SERVER_PORT=8081
     depends_on:
       - postgres
     ports:
-      - "8080:8080"
+      - "8081:8081"
     restart: unless-stopped
 
 volumes:

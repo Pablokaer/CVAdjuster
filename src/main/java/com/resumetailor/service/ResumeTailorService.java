@@ -4,6 +4,7 @@ import com.resumetailor.dto.TailorResponse;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Value;
+import org.springframework.scheduling.annotation.Scheduled;
 import org.springframework.stereotype.Service;
 import org.springframework.web.multipart.MultipartFile;
 
@@ -11,7 +12,10 @@ import java.io.IOException;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.Paths;
+import java.time.Duration;
+import java.time.Instant;
 import java.util.UUID;
+import java.util.stream.Stream;
 
 @Slf4j
 @Service
@@ -25,6 +29,9 @@ public class ResumeTailorService {
 
     @Value("${app.temp-dir}")
     private String tempDir;
+
+    @Value("${app.generated-file-ttl-hours:24}")
+    private long generatedFileTtlHours;
 
     /**
      * Orchestrates the full flow: extraction → AI tailoring → file generation.
@@ -134,5 +141,50 @@ public class ResumeTailorService {
             throw new IOException("File not found: " + filename);
         }
         return Files.readAllBytes(filePath);
+    }
+
+    @Scheduled(
+            fixedDelayString = "${app.generated-file-cleanup-ms:3600000}",
+            initialDelayString = "${app.generated-file-cleanup-initial-delay-ms:3600000}"
+    )
+    public void cleanupGeneratedFiles() {
+        Path dir = Paths.get(tempDir);
+        if (!Files.isDirectory(dir)) {
+            return;
+        }
+
+        Instant cutoff = Instant.now().minus(Duration.ofHours(generatedFileTtlHours));
+
+        try (Stream<Path> files = Files.list(dir)) {
+            files.filter(Files::isRegularFile)
+                    .filter(this::isGeneratedResumeFile)
+                    .filter(path -> isOlderThan(path, cutoff))
+                    .forEach(this::deleteGeneratedFile);
+        } catch (IOException e) {
+            log.warn("Could not clean generated resume files in {}", dir, e);
+        }
+    }
+
+    private boolean isGeneratedResumeFile(Path path) {
+        String filename = path.getFileName().toString();
+        return filename.matches("resume-tailored-[a-fA-F0-9-]+\\.(pdf|docx)");
+    }
+
+    private boolean isOlderThan(Path path, Instant cutoff) {
+        try {
+            return Files.getLastModifiedTime(path).toInstant().isBefore(cutoff);
+        } catch (IOException e) {
+            log.warn("Could not read modified time for generated file {}", path, e);
+            return false;
+        }
+    }
+
+    private void deleteGeneratedFile(Path path) {
+        try {
+            Files.deleteIfExists(path);
+            log.info("Deleted expired generated resume file: {}", path.getFileName());
+        } catch (IOException e) {
+            log.warn("Could not delete generated resume file {}", path, e);
+        }
     }
 }

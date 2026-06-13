@@ -9,12 +9,20 @@ import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.http.HttpHeaders;
 import org.springframework.http.MediaType;
+import org.springframework.http.client.reactive.ReactorClientHttpConnector;
 import org.springframework.stereotype.Service;
 import org.springframework.web.reactive.function.client.WebClient;
+import org.springframework.web.reactive.function.client.WebClientRequestException;
 import org.springframework.web.reactive.function.client.WebClientResponseException;
+import reactor.netty.http.client.HttpClient;
 
+import io.netty.channel.ChannelOption;
+import io.netty.handler.timeout.ReadTimeoutHandler;
+import io.netty.handler.timeout.WriteTimeoutHandler;
+import java.time.Duration;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.concurrent.TimeUnit;
 
 @Slf4j
 @Service
@@ -25,6 +33,7 @@ public class OpenAIService {
     private final WebClient webClient;
     private final String model;
     private final int maxTokens;
+    private final Duration responseTimeout;
     private final ObjectMapper objectMapper = new ObjectMapper();
 
     public OpenAIService(
@@ -32,13 +41,24 @@ public class OpenAIService {
             @Value("${openai.api.key}") String apiKey,
             @Value("${openai.api.url}") String apiUrl,
             @Value("${openai.api.model}") String model,
-            @Value("${openai.api.max-tokens}") int maxTokens) {
+            @Value("${openai.api.max-tokens}") int maxTokens,
+            @Value("${openai.api.connect-timeout-ms:10000}") int connectTimeoutMs,
+            @Value("${openai.api.response-timeout-seconds:120}") long responseTimeoutSeconds) {
 
         this.model = model;
         this.maxTokens = maxTokens;
+        this.responseTimeout = Duration.ofSeconds(responseTimeoutSeconds);
+
+        HttpClient httpClient = HttpClient.create()
+                .option(ChannelOption.CONNECT_TIMEOUT_MILLIS, connectTimeoutMs)
+                .responseTimeout(responseTimeout)
+                .doOnConnected(connection -> connection
+                        .addHandlerLast(new ReadTimeoutHandler(responseTimeoutSeconds, TimeUnit.SECONDS))
+                        .addHandlerLast(new WriteTimeoutHandler(responseTimeoutSeconds, TimeUnit.SECONDS)));
 
         this.webClient = webClientBuilder
                 .baseUrl(apiUrl)
+                .clientConnector(new ReactorClientHttpConnector(httpClient))
                 .defaultHeader(HttpHeaders.CONTENT_TYPE, MediaType.APPLICATION_JSON_VALUE)
                 .defaultHeader(HttpHeaders.AUTHORIZATION, "Bearer " + apiKey)
                 .build();
@@ -68,7 +88,7 @@ public class OpenAIService {
                     .bodyValue(request)
                     .retrieve()
                     .bodyToMono(OpenAIResponse.class)
-                    .block();
+                    .block(responseTimeout.plusSeconds(5));
 
             if (response == null || response.getChoices() == null || response.getChoices().isEmpty()) {
                 throw new RuntimeException("Empty response from OpenAI API.");
@@ -84,6 +104,9 @@ public class OpenAIService {
         } catch (WebClientResponseException e) {
             log.error("OpenAI API error: {} — {}", e.getStatusCode(), e.getResponseBodyAsString());
             throw new RuntimeException("Error calling OpenAI API: " + e.getMessage(), e);
+        } catch (WebClientRequestException | IllegalStateException e) {
+            log.error("OpenAI API request failed or timed out: {}", e.getMessage(), e);
+            throw new RuntimeException("OpenAI API request failed or timed out. Please try again.", e);
         }
     }
 

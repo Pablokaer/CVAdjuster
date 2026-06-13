@@ -1,0 +1,8 @@
+CREATE TABLE users (
+    id BIGSERIAL PRIMARY KEY,
+    email VARCHAR(255) NOT NULL UNIQUE,
+    password VARCHAR(255),
+    email_verified BOOLEAN NOT NULL DEFAULT TRUE,
+    provider VARCHAR(255),
+    credits INTEGER NOT NULL DEFAULT 0
+);

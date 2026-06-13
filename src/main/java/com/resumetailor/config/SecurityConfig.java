@@ -38,11 +38,6 @@ public class SecurityConfig {
                 .permitAll()
             )
 
-            .oauth2Login(oauth -> oauth
-                .loginPage("/login")
-                .defaultSuccessUrl("/", true)
-            )
-
             .logout(logout -> logout
                 .logoutUrl("/logout")
                 .logoutSuccessUrl("/")
