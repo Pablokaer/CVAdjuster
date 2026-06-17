@@ -60,12 +60,46 @@
     }
     .highlight-box {
       background: rgba(124,92,255,.08);
-      border-left: 3px solid var(--accent-1);
+      border: 1px solid rgba(124,92,255,.22);
       padding: 14px 14px;
       margin: 16px 0;
       border-radius: 8px;
       font-size: 14px;
       color: rgba(255,255,255,.80);
+    }
+    @media (max-width: 720px) {
+      .about-section {
+        margin: 30px 0;
+      }
+      .about-section h3 {
+        font-size: 18px;
+        margin: 24px 0 12px;
+        line-height: 1.25;
+      }
+      .about-section p,
+      .about-section li {
+        font-size: 14px;
+      }
+      .about-section li {
+        padding-left: 20px;
+      }
+      .cta-section {
+        flex-direction: column;
+        margin-top: 34px;
+      }
+      .cta-section a {
+        width: 100%;
+        min-height: 46px;
+        justify-content: center;
+      }
+      .card > div[style] {
+        padding: 22px !important;
+      }
+    }
+    @media (max-width: 420px) {
+      .card > div[style] {
+        padding: 18px !important;
+      }
     }
   </style>
 </head>

@@ -278,3 +278,113 @@
     .hcard-footer { gap: 6px; }
     .hcard-btn    { font-size: 11px; padding: 6px 10px; }
 }
+
+@media (max-width: 720px) {
+    .wrapper {
+        max-width: none;
+        padding: 28px 16px 44px;
+    }
+
+    .back-link {
+        width: 100%;
+        min-height: 46px;
+        justify-content: center;
+        margin-bottom: 28px;
+    }
+
+    .page-header {
+        margin-bottom: 28px;
+        text-align: center;
+    }
+
+    .page-title {
+        font-size: 32px;
+        line-height: 1.12;
+    }
+
+    .page-subtitle {
+        max-width: 34rem;
+    }
+
+    .empty-state {
+        padding: 42px 20px;
+    }
+
+    .hcard {
+        border-radius: 14px;
+    }
+
+    .hcard-header {
+        align-items: center;
+        flex-direction: column;
+        padding: 16px 16px 10px;
+        text-align: center;
+    }
+
+    .hcard-meta {
+        width: 100%;
+        justify-content: center;
+    }
+
+    .hcard-format {
+        align-self: center;
+    }
+
+    .hcard-snippet {
+        padding: 0 16px 14px;
+        -webkit-line-clamp: 3;
+        text-align: center;
+    }
+
+    .hcard-footer {
+        display: grid;
+        grid-template-columns: 1fr 1fr;
+        padding: 12px 16px;
+        gap: 8px;
+    }
+
+    .hcard-spacer {
+        display: none;
+    }
+
+    .hcard-btn {
+        min-height: 44px;
+        justify-content: center;
+        font-size: 12px;
+        padding: 9px 10px;
+    }
+
+    .hcard-btn.view {
+        grid-column: 1 / -1;
+    }
+
+    .hcard-text-panel {
+        padding: 16px;
+    }
+
+    .hcard-text-header {
+        gap: 12px;
+    }
+
+    .hcard-copy-btn {
+        min-height: 40px;
+        padding: 8px 12px;
+    }
+
+    .hcard-text-body {
+        max-height: 55vh;
+        font-size: 12px;
+        line-height: 1.7;
+        overflow-x: auto;
+    }
+}
+
+@media (max-width: 420px) {
+    .wrapper {
+        padding: 24px 12px 40px;
+    }
+
+    .hcard-meta {
+        justify-content: center;
+    }
+}

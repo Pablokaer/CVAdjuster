@@ -1,261 +1,325 @@
-# Resume Tailor
+codex# Resume Tailor
 
-AI-powered resume tailoring application built with Spring Boot. Upload your resume, paste a job description, and get a version rewritten by GPT-4o — optimized for ATS, formatted, and ready to download as PDF or DOCX.
+Web application for automatically tailoring resumes with artificial intelligence. Users upload a resume in PDF or DOCX format, paste a job description, and receive a rewritten version optimized for ATS, with job-specific keywords, explanations of the changes, and final files available for download as PDF and DOCX.
 
----
+## Project Goal
+
+Resume Tailor aims to reduce the time required to customize a resume for each job application. Instead of manually editing a document for every opening, the application extracts the text from the original resume, analyzes the target job description, and uses the OpenAI API to generate a version that is better aligned with the role.
+
+The project also works as a complete SaaS-style product: it includes authentication, generated resume history, a credit system, Stripe checkout, email notifications, and Docker-based infrastructure for the database and deployment.
+
+## Result
+
+At the end of the flow, the user receives:
+
+- A rewritten resume focused on the target job.
+- Highlights of the main changes made by the AI.
+- A list of identified and incorporated keywords.
+- A PDF download of the final resume.
+- A DOCX download of the final resume.
+- A link to view the DOCX in Google Docs.
+- A saved history entry for future access.
+
+Each generation consumes 1 credit. If processing fails, the credit is automatically refunded.
 
 ## Features
 
-- **AI Tailoring** — GPT-4o rewrites your resume to match a target job description, integrating keywords, converting responsibilities to achievement-based bullets, and preserving structure
-- **ATS Optimization** — highlights keyword matches and explains each change made
-- **PDF & DOCX output** — both formats generated on every request
-- **Credit System** — pay-as-you-go (1 credit per generation); buy packs via Stripe Checkout
-- **Resume History** — every tailored resume saved per-user and accessible at `/history`
-- **Authentication** — email/password registration or Google OAuth2 login
-- **Password Reset** — time-limited, single-use reset links via email
-- **Email Notifications** — welcome email on sign-up, purchase confirmation on credit purchase
-- **File upload** — supports PDF and DOCX resumes up to 10 MB
+- Resume upload in PDF or DOCX format, up to 10 MB.
+- Text extraction using Apache PDFBox and Apache POI.
+- Resume rewriting with OpenAI GPT-4o.
+- ATS optimization focused on job-specific keywords.
+- Automatic PDF and DOCX generation.
+- Email and password registration/login.
+- Google OAuth2 login.
+- Password reset through email tokens.
+- Per-user credit system.
+- Credit purchases through Stripe Checkout.
+- Stripe webhook processing with idempotency tracking.
+- Generated resume history.
+- Welcome, password reset, and purchase confirmation emails.
+- Automatic cleanup of temporary generated files.
+- Input validation, including word limits and suspicious content detection in job descriptions.
 
----
+## Technologies Used
 
-## Tech Stack
+| Layer | Technology |
+| --- | --- |
+| Language | Java 21 |
+| Backend | Spring Boot 3.2.5 |
+| Web MVC | Spring Web |
+| Templates | Thymeleaf |
+| Security | Spring Security |
+| Social login | Spring OAuth2 Client with Google |
+| Database | PostgreSQL 15 |
+| ORM | Spring Data JPA / Hibernate |
+| Migrations | Flyway |
+| AI | OpenAI GPT-4o through WebClient |
+| PDF reading | Apache PDFBox |
+| PDF generation | iText 8 |
+| DOCX reading and generation | Apache POI |
+| Payments | Stripe Java SDK |
+| Email | Spring Mail with SMTP |
+| Build | Maven |
+| Containers | Docker and Docker Compose |
+| Basic observability | Spring Boot Actuator and Logback |
 
-| Layer          | Technology                                    |
-|----------------|-----------------------------------------------|
-| Backend        | Spring Boot 3.2.5 (Java 21)                   |
-| Templating     | Thymeleaf + Spring Security extras            |
-| Database       | PostgreSQL 15 (via Docker)                    |
-| Migrations     | Flyway                                        |
-| ORM            | Spring Data JPA / Hibernate                   |
-| AI             | OpenAI GPT-4o (via WebFlux WebClient)         |
-| PDF read       | Apache PDFBox 3                               |
-| PDF write      | iText 7                                       |
-| DOCX read/write| Apache POI 5                                  |
-| Auth           | Spring Security + OAuth2 Client (Google)      |
-| Payments       | Stripe Java SDK                               |
-| Email          | Spring Mail (Gmail SMTP)                      |
-| Build          | Maven                                         |
+## Architecture Overview
 
----
+The project is organized into layers:
+
+- `controller`: receives HTTP requests, validates inputs, and delegates to services.
+- `service`: contains business logic, AI integration, file generation, email handling, and credit operations.
+- `repository`: database access through Spring Data JPA.
+- `model`: main JPA entities.
+- `dto`: data transfer objects used between layers and in responses.
+- `payment`: dedicated module for checkout, plans, orders, and Stripe webhooks.
+- `event`: domain events used to trigger notifications.
+- `templates`: server-rendered Thymeleaf pages.
+- `static`: CSS and public assets.
+- `db/migration`: Flyway scripts for creating and evolving the database schema.
+
+## Project Structure
+
+```text
+src/main/java/com/resumetailor/
+├── config/                 Security, password, and async execution configuration
+├── controller/             MVC controllers and application endpoints
+├── dto/                    Input and output objects
+├── event/                  Notification events and listeners
+├── exception/              Domain exceptions
+├── model/                  JPA entities
+├── payment/                Stripe checkout, orders, plans, and webhooks
+├── repository/             Spring Data repositories
+├── service/                Business logic and external integrations
+└── ResumeTailorApplication.java
+
+src/main/resources/
+├── db/migration/           Flyway migrations
+├── static/                 CSS and images
+├── templates/              Thymeleaf pages
+├── application.properties  Main configuration
+└── application-prod.properties
+```
+
+## Main Flow
+
+1. The user creates an account or logs in.
+2. The user buys credits on the `/credits` page.
+3. The user uploads a resume in PDF or DOCX format.
+4. The user pastes the target job description.
+5. The application validates the file and job description.
+6. One credit is deducted before processing.
+7. The resume text is extracted.
+8. The resume and job description are sent to OpenAI.
+9. The application receives the tailored resume, changes, and keywords.
+10. The system generates PDF and DOCX files.
+11. The result is saved to the user's history.
+12. The result page displays the final text and download links.
 
 ## Credit Plans
 
-| Plan       | Credits | Price  | Cost per Resume |
-|------------|---------|--------|-----------------|
-| Starter    | 2       | €1.99  | €0.99           |
-| Pro ⭐      | 8       | €5.99  | €0.75           |
-| Premium    | 20      | €9.99  | €0.50           |
-
-Each resume generation costs **1 credit**. Credits are never lost on failure — they are refunded if the AI call fails.
-
----
+| Plan | Credits | Price | Cost per resume |
+| --- | ---: | ---: | ---: |
+| Starter | 2 | EUR 1.99 | EUR 0.99 |
+| Pro | 8 | EUR 5.99 | EUR 0.75 |
+| Premium | 20 | EUR 9.99 | EUR 0.50 |
 
 ## Prerequisites
 
 - Java 21
-- Maven 3.8+
-- Docker (for PostgreSQL)
-
----
-
-## Setup
-
-### 1. Clone the repository
-
-```bash
-git clone https://github.com/Pablokaer/resume-tailor-openai_6.git
-cd resume-tailor-openai_6
-```
-
-### 2. Create a `.env` file
-
-Create a `.env` file at the project root. **Never commit this file.**
-
-```env
-# OpenAI
-OPENAI_API_KEY=sk-proj-...
-
-# Google OAuth2 (optional — skip if you only want email/password login)
-GOOGLE_CLIENT_ID=your-google-client-id.apps.googleusercontent.com
-GOOGLE_CLIENT_SECRET=your-google-client-secret
-
-# Stripe
-STRIPE_SECRET_KEY=sk_test_...
-STRIPE_WEBHOOK_SECRET=whsec_...
-
-# Gmail SMTP (requires a Gmail App Password, not your account password)
-MAIL_USERNAME=you@gmail.com
-MAIL_APP_PASSWORD=xxxx xxxx xxxx xxxx
-```
-
-**Where to get each credential:**
-
-| Variable                                    | Source                                                                                                                                           |
-|---------------------------------------------|--------------------------------------------------------------------------------------------------------------------------------------------------|
-| `OPENAI_API_KEY`                            | https://platform.openai.com/api-keys                                                                                                             |
-| `GOOGLE_CLIENT_ID` / `GOOGLE_CLIENT_SECRET` | Google Cloud Console → Credentials → OAuth 2.0 Client ID (Web), redirect URI: `http://localhost:8080/login/oauth2/code/google`                   |
-| `STRIPE_SECRET_KEY`                         | https://dashboard.stripe.com/test/apikeys                                                                                                        |
-| `STRIPE_WEBHOOK_SECRET`                     | Stripe Dashboard → Developers → Webhooks → your endpoint → Signing secret                                                                       |
-| `MAIL_APP_PASSWORD`                         | Google Account → Security → 2-Step Verification → App Passwords                                                                                 |
-
-> If Google credentials are not set, the "Continue with Google" button will error. Email/password login works without them.
->
-> If Stripe keys are not set, the payment flow will be unavailable but the rest of the app works.
-
-### 3. Start the database
-
-```bash
-docker compose up -d
-```
-
-This starts PostgreSQL 15 on port **5434** with:
-- Database: `resumetailor`
-- Username: `postgres`
-- Password: `postgres`
-
-Flyway runs migrations automatically on first boot.
-
-### 4. Run the application
-
-```bash
-export $(cat .env | xargs) && mvn spring-boot:run
-```
-
-The app starts at **http://localhost:8080**.
-
----
-
-## Usage
-
-1. Create an account at `/register` or sign in with Google
-2. Purchase credits at `/credits` using Stripe Checkout
-3. Upload your resume (PDF or DOCX, max 10 MB)
-4. Paste the job description
-5. Click **Tailor Resume** — wait ~10–20 s for the AI to process
-6. Download your tailored resume (PDF or DOCX) or copy the text
-7. View past resumes any time at `/history`
-
-### Stripe test cards
-
-| Card                   | Result            |
-|------------------------|-------------------|
-| `4242 4242 4242 4242`  | Successful payment |
-| `4000 0000 0000 0002`  | Card declined      |
-
-Use any future expiry date and any 3-digit CVC.
-
----
-
-## Project Structure
-
-```
-src/main/java/com/resumetailor/
-├── config/
-│   ├── AsyncConfig.java             Email thread pool (2–5 threads)
-│   ├── PasswordConfig.java          BCrypt encoder bean
-│   └── SecurityConfig.java          Spring Security + OAuth2 setup
-├── controller/
-│   ├── AuthController.java          /register, /login
-│   ├── CreditsController.java       /credits, Stripe redirect handling
-│   ├── HistoryController.java       /history, /history/{id}/text
-│   ├── PasswordResetController.java /forgot-password, /reset-password
-│   ├── ResumeTailorController.java  /tailor, /download, /open-in-gdocs
-│   └── GlobalExceptionHandler.java  Centralized error handling
-├── dto/
-│   ├── TailorRequest.java / TailorResponse.java
-│   ├── ChangeHighlight.java / KeywordMatch.java
-│   ├── RegisterDTO.java
-│   ├── ForgotPasswordDTO.java / ResetPasswordDTO.java
-│   └── OpenAIDtos.java
-├── event/
-│   ├── UserRegisteredEvent.java
-│   ├── CreditsPurchasedEvent.java
-│   └── NotificationEventListener.java  @TransactionalEventListener dispatch
-├── exception/
-│   ├── InsufficientCreditsException.java
-│   ├── EmailAlreadyRegisteredException.java
-│   └── InvalidTokenException.java
-├── model/
-│   ├── User.java                    Users table (LOCAL + GOOGLE providers)
-│   ├── ResumeHistory.java           Per-user resume history
-│   └── PasswordResetToken.java      Time-limited, single-use reset tokens
-├── payment/
-│   ├── config/StripeConfig.java
-│   ├── controller/
-│   │   ├── PaymentController.java   /api/payment/checkout, /api/payment/orders/{id}
-│   │   └── WebhookController.java   /api/webhook/stripe
-│   ├── entity/
-│   │   ├── CreditPlan.java          STARTER / PRO / PREMIUM enum
-│   │   ├── Order.java               Stripe order record
-│   │   ├── OrderStatus.java         PENDING / PAID / CANCELED
-│   │   └── StripeProcessedEvent.java  Idempotency log
-│   └── service/PaymentService.java
-├── repository/
-│   ├── UserRepository.java
-│   ├── ResumeHistoryRepository.java
-│   ├── PasswordResetTokenRepository.java
-│   └── payment/
-│       ├── OrderRepository.java
-│       └── StripeProcessedEventRepository.java
-└── service/
-    ├── UserService.java             Credit deduction, refund, add
-    ├── ResumeTailorService.java     Orchestrates the full tailoring flow
-    ├── OpenAIService.java           GPT-4o API integration
-    ├── ResumeExtractorService.java  PDF/DOCX text extraction
-    ├── PdfGeneratorService.java     iText7 PDF generation
-    ├── DocxGeneratorService.java    Apache POI DOCX generation
-    ├── EmailService.java            Low-level JavaMailSender wrapper
-    ├── EmailTemplates.java          HTML email templates
-    ├── NotificationService.java     High-level async email dispatch
-    ├── PasswordResetService.java    Token lifecycle + rate limiting
-    └── CustomUserDetailsService.java
-```
-
----
-
-## API Endpoints
-
-| Method  | Path                          | Auth     | Description                              |
-|---------|-------------------------------|----------|------------------------------------------|
-| `GET`   | `/`                           | Public   | Landing / main form                      |
-| `GET`   | `/login`                      | Public   | Login page                               |
-| `GET`   | `/register`                   | Public   | Registration form                        |
-| `POST`  | `/register`                   | Public   | Create account                           |
-| `GET`   | `/forgot-password`            | Public   | Forgot password page                     |
-| `POST`  | `/forgot-password`            | Public   | Request reset link                       |
-| `GET`   | `/reset-password`             | Public   | Reset form (validates token)             |
-| `POST`  | `/reset-password`             | Public   | Update password                          |
-| `GET`   | `/credits`                    | Required | Credits & billing page                   |
-| `POST`  | `/tailor`                     | Required | Submit resume for tailoring (form)       |
-| `POST`  | `/api/tailor`                 | Required | Submit resume for tailoring (JSON)       |
-| `GET`   | `/download/{filename}`        | Public   | Download generated file                  |
-| `GET`   | `/open-in-gdocs/{filename}`   | Public   | View DOCX in Google Docs                 |
-| `GET`   | `/history`                    | Required | Resume history list                      |
-| `GET`   | `/history/{id}/text`          | Required | Fetch tailored text (JSON)               |
-| `POST`  | `/api/payment/checkout`       | Required | Create Stripe Checkout session           |
-| `GET`   | `/api/payment/orders/{id}`    | Public   | Get order status                         |
-| `POST`  | `/api/webhook/stripe`         | Signed   | Stripe webhook receiver                  |
-
----
+- Maven 3.8 or later
+- Docker and Docker Compose
+- OpenAI account and API key
+- Stripe keys for payment testing
+- SMTP credentials for email delivery
+- Google OAuth2 credentials if Google login should be enabled
 
 ## Environment Variables
 
-| Variable                | Required      | Description                                    |
-|-------------------------|---------------|------------------------------------------------|
-| `OPENAI_API_KEY`        | Yes           | OpenAI API key                                 |
-| `STRIPE_SECRET_KEY`     | For payments  | Stripe secret key                              |
-| `STRIPE_WEBHOOK_SECRET` | For payments  | Stripe webhook signing secret                  |
-| `MAIL_USERNAME`         | For email     | Gmail sender address                           |
-| `MAIL_APP_PASSWORD`     | For email     | Gmail App Password (not account password)      |
-| `GOOGLE_CLIENT_ID`      | For Google login | Google OAuth2 client ID                     |
-| `GOOGLE_CLIENT_SECRET`  | For Google login | Google OAuth2 client secret                 |
+Create a `.env` file in the project root. This file must not be committed.
 
----
+```env
+APP_BASE_URL=http://localhost:8081
 
-## .gitignore
+DB_URL=jdbc:postgresql://localhost:5434/resumetailor
+DB_USERNAME=postgres
+DB_PASSWORD=postgres
 
-Ensure your `.env` file is never committed:
+OPENAI_API_KEY=sk-proj-...
 
-```gitignore
-.env
+STRIPE_SECRET_KEY=sk_test_...
+STRIPE_WEBHOOK_SECRET=whsec_...
+
+MAIL_USERNAME=your-email@gmail.com
+MAIL_APP_PASSWORD=your-app-password
+
+GOOGLE_CLIENT_ID=your-client-id.apps.googleusercontent.com
+GOOGLE_CLIENT_SECRET=your-client-secret
 ```
+
+Main variables:
+
+| Variable | Required | Purpose |
+| --- | --- | --- |
+| `APP_BASE_URL` | Yes | Base URL used for redirects, downloads, and Google Docs links |
+| `DB_URL` | Yes | PostgreSQL JDBC URL |
+| `DB_USERNAME` | Yes | Database user |
+| `DB_PASSWORD` | Yes | Database password |
+| `OPENAI_API_KEY` | Yes | OpenAI API key |
+| `STRIPE_SECRET_KEY` | For payments | Stripe secret key |
+| `STRIPE_WEBHOOK_SECRET` | For webhooks | Stripe webhook signing secret |
+| `MAIL_USERNAME` | For emails | Sender account |
+| `MAIL_APP_PASSWORD` | For emails | SMTP app password |
+| `GOOGLE_CLIENT_ID` | For Google login | OAuth2 client ID |
+| `GOOGLE_CLIENT_SECRET` | For Google login | OAuth2 client secret |
+
+## Running Locally
+
+Start PostgreSQL:
+
+```powershell
+docker compose up -d postgres
+```
+
+Load environment variables in PowerShell:
+
+```powershell
+Get-Content .env | ForEach-Object {
+    if ($_ -match '^\s*([^#][^=]+)=(.*)$') {
+        [Environment]::SetEnvironmentVariable($matches[1].Trim(), $matches[2].Trim(), 'Process')
+    }
+}
+```
+
+Run the application:
+
+```powershell
+mvn spring-boot:run
+```
+
+The application uses port `8081` by default:
+
+```text
+http://localhost:8081
+```
+
+You can also run the full application stack with Docker Compose:
+
+```powershell
+docker compose up -d --build
+```
+
+## Build
+
+```powershell
+mvn clean package
+```
+
+The generated artifact is created at:
+
+```text
+target/resume-tailor-0.0.1-SNAPSHOT.jar
+```
+
+## Main Endpoints
+
+| Method | Route | Authentication | Description |
+| --- | --- | --- | --- |
+| `GET` | `/` | Public | Home page and main form |
+| `GET` | `/about` | Public | About page |
+| `GET` | `/login` | Public | Login page |
+| `GET` | `/register` | Public | Registration page |
+| `POST` | `/register` | Public | Creates a user |
+| `GET` | `/forgot-password` | Public | Password reset request page |
+| `POST` | `/forgot-password` | Public | Sends password reset link |
+| `GET` | `/reset-password` | Public | New password form |
+| `POST` | `/reset-password` | Public | Updates password |
+| `GET` | `/credits` | Required | Credits and plans page |
+| `POST` | `/tailor` | Required | Processes a resume through the web form |
+| `POST` | `/api/tailor` | Required | Processes a resume through the API |
+| `GET` | `/download/{filename}` | Public | Downloads a generated file |
+| `GET` | `/open-in-gdocs/{filename}` | Public | Opens DOCX in Google Docs |
+| `GET` | `/history` | Required | Generated resume history |
+| `GET` | `/history/{id}/text` | Required | Text for one history entry |
+| `POST` | `/api/payment/checkout` | Required | Creates a Stripe Checkout session |
+| `GET` | `/api/payment/orders/{id}` | Public | Gets order status |
+| `POST` | `/api/webhook/stripe` | Stripe signature | Receives Stripe events |
+
+## Database
+
+The development database is PostgreSQL. The `docker-compose.yml` file starts a container with:
+
+```text
+Database: resumetailor
+User: postgres
+Password: postgres
+Local port: 5434
+```
+
+Tables are created and updated automatically by Flyway when the application starts.
+
+Existing migrations:
+
+- `V1__create_users.sql`
+- `V2__add_credits_and_orders.sql`
+- `V3__add_password_reset_tokens.sql`
+- `V4__add_password_reset_created_at.sql`
+- `V5__add_stripe_processed_events.sql`
+- `V6__create_resume_history.sql`
+
+## Payments
+
+Payments use Stripe Checkout. The application creates a local order, redirects the user to Stripe, and confirms the purchase through the `/api/webhook/stripe` webhook.
+
+Useful test cards:
+
+| Card | Result |
+| --- | --- |
+| `4242 4242 4242 4242` | Successful payment |
+| `4000 0000 0000 0002` | Card declined |
+
+Use any future expiration date and any 3-digit CVC.
+
+## Security and Validation
+
+- Passwords are stored with BCrypt.
+- Authentication is protected by Spring Security.
+- Google OAuth2 login is supported.
+- Password reset tokens are single-use.
+- File extensions are validated.
+- Download routes protect against path traversal.
+- Job descriptions are sanitized.
+- Job descriptions are limited to 3,000 words.
+- Extracted resume text is limited to 2,000 words.
+- Credits are refunded when AI processing fails.
+- Stripe webhooks are validated by signature.
+
+## Deployment
+
+The project includes:
+
+- `Dockerfile` for packaging the application.
+- `docker-compose.yml` for an app and PostgreSQL environment.
+- `docker-compose.prod.yml` for production deployment.
+- `application-prod.properties` with cache, logging, secure cookie, and Actuator settings.
+- `.env.production.example` with example production variables.
+
+For production, configure:
+
+```env
+SPRING_PROFILES_ACTIVE=prod
+APP_BASE_URL=https://your-domain.com
+```
+
+Stripe must also be configured with the public webhook endpoint:
+
+```text
+https://your-domain.com/api/webhook/stripe
+```
+
+## Notes
+
+- Generated files are temporary and stored in `app.temp-dir`.
+- The default generated file lifetime is 24 hours.
+- Scanned PDFs may fail because extraction depends on selectable text.
+- The `.env` file contains secrets and must not be committed.

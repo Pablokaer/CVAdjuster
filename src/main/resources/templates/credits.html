@@ -5,6 +5,8 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta name="_csrf" th:content="${_csrf.token}">
+    <meta name="_csrf_header" th:content="${_csrf.headerName}">
     <title>Add Credits — CV FIT AI</title>
 
     <link rel="preconnect" href="https://fonts.googleapis.com">
@@ -135,11 +137,16 @@
 <script>
     async function checkout(planId) {
         document.getElementById('redirectOverlay').classList.add('active');
+        const csrfToken = document.querySelector('meta[name="_csrf"]').content;
+        const csrfHeader = document.querySelector('meta[name="_csrf_header"]').content;
 
         try {
             const res = await fetch('/api/payment/checkout', {
                 method: 'POST',
-                headers: { 'Content-Type': 'application/json' },
+                headers: {
+                    'Content-Type': 'application/json',
+                    [csrfHeader]: csrfToken
+                },
                 body: JSON.stringify({ planId })
             });
 

@@ -64,6 +64,10 @@ body::before {
     justify-content: space-between;
 }
 
+.auth-topbar .topbar-inner {
+    justify-content: center;
+}
+
 .topbar-brand {
     font-family: 'Epilogue', sans-serif;
     font-weight: 700;
@@ -428,4 +432,121 @@ label span { color: var(--accent); margin-left: 3px; }
 @media (max-width: 480px) {
     .card { padding: 28px 20px; }
     .auth-wrapper { padding: 70px 16px 32px; }
+}
+
+@media (max-width: 720px) {
+    body {
+        min-width: 320px;
+    }
+
+    .topbar {
+        position: sticky;
+    }
+
+    .topbar-inner {
+        height: auto;
+        min-height: 56px;
+        padding: 10px 16px;
+        flex-direction: column;
+        align-items: stretch;
+        justify-content: center;
+        gap: 10px;
+    }
+
+    .topbar-brand {
+        justify-content: center;
+        min-height: 32px;
+    }
+
+    .topbar-actions,
+    .topbar-actions > div,
+    .user-menu {
+        width: 100%;
+        justify-content: center;
+        flex-wrap: wrap;
+        gap: 8px;
+    }
+
+    .btn-nav-outline,
+    .btn-nav-primary,
+    .btn-add-credits,
+    .btn-logout {
+        min-height: 44px;
+        padding: 10px 12px;
+        justify-content: center;
+    }
+
+    .credits-badge {
+        min-height: 36px;
+        padding: 8px 12px;
+    }
+
+    .user-avatar,
+    .user-name {
+        display: none;
+    }
+
+    .card {
+        border-radius: 16px;
+        padding: 24px;
+    }
+
+    .btn-submit,
+    .btn-oauth {
+        width: 100%;
+        min-height: 48px;
+    }
+
+    .alert,
+    .alert-no-credits {
+        align-items: center;
+        justify-content: center;
+        flex-wrap: wrap;
+        gap: 10px;
+        line-height: 1.5;
+        text-align: center;
+    }
+
+    .alert-credits-link {
+        margin-left: 0;
+        width: 100%;
+        text-align: center;
+    }
+
+    .orb {
+        display: none;
+    }
+}
+
+@media (max-width: 420px) {
+    .topbar-inner {
+        padding-inline: 12px;
+    }
+
+    .topbar-actions,
+    .topbar-actions > div,
+    .user-menu {
+        align-items: center;
+    }
+
+    .topbar-actions a,
+    .topbar-actions button,
+    .user-menu a,
+    .user-menu button {
+        flex: 1 1 calc(50% - 8px);
+    }
+
+    .credits-badge {
+        flex: 1 1 100%;
+        justify-content: center;
+    }
+
+    .auth-wrapper {
+        align-items: center;
+        padding: 24px 12px 32px;
+    }
+
+    .auth-wrapper .card {
+        padding: 24px 18px;
+    }
 }

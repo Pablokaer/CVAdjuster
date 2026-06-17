@@ -19,7 +19,7 @@ public class SecurityConfig {
                     "/", "/login", "/register", "/about",
                     "/forgot-password", "/reset-password", "/reset-password-success",
                     "/css/**", "/js/**", "/images/**",
-                    "/favicon.ico",
+                    "/favicon.ico", "/favicon.png",
                     // Stripe webhook must be publicly accessible (called by Stripe servers)
                     "/api/webhook/**"
                 ).permitAll()

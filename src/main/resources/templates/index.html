@@ -18,16 +18,34 @@
 
 <body>
 
-<nav class="topbar">
+<nav class="topbar home-topbar">
     <div class="topbar-inner">
-
         <a href="/" class="topbar-brand">CV FIT AI</a>
+    </div>
+</nav>
 
+<div class="orb orb-1"></div>
+<div class="orb orb-2"></div>
+
+<div class="loading-overlay" id="loadingOverlay">
+    <div class="spinner"></div>
+    <div class="loading-text">Processing your resume...</div>
+
+    <div class="loading-steps">
+        <div class="loading-step active" id="step-extract">Extracting resume</div>
+        <div class="loading-step" id="step-ai">Analyzing with AI</div>
+        <div class="loading-step" id="step-generate">Generating result</div>
+    </div>
+</div>
+
+<div class="wrapper">
+
+    <div class="page-actions">
         <div class="topbar-actions">
 
             <a href="/about" class="btn-nav-outline">About this project</a>
 
-            <div sec:authorize="!isAuthenticated()" style="display:flex; gap:10px;">
+            <div sec:authorize="!isAuthenticated()" class="auth-action-group">
                 <a href="/register" class="btn-nav-primary">Create account</a>
                 <a href="/login" class="btn-nav-outline">Login</a>
             </div>
@@ -59,27 +77,9 @@
                 <form th:action="@{/logout}" method="post">
                     <button type="submit" class="btn-logout">Sign out</button>
                 </form>
-
             </div>
         </div>
     </div>
-</nav>
-
-<div class="orb orb-1"></div>
-<div class="orb orb-2"></div>
-
-<div class="loading-overlay" id="loadingOverlay">
-    <div class="spinner"></div>
-    <div class="loading-text">Processing your resume...</div>
-
-    <div class="loading-steps">
-        <div class="loading-step active" id="step-extract">Extracting resume</div>
-        <div class="loading-step" id="step-ai">Analyzing with AI</div>
-        <div class="loading-step" id="step-generate">Generating result</div>
-    </div>
-</div>
-
-<div class="wrapper">
 
     <header>
         <div class="badge">Powered by OpenAI</div>

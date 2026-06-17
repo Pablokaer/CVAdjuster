@@ -12,12 +12,9 @@
 </head>
 <body>
 
-<nav class="topbar">
+<nav class="topbar auth-topbar">
   <div class="topbar-inner">
     <a href="/" class="topbar-brand">CV FIT AI</a>
-    <div class="topbar-actions">
-      <a href="/register" class="btn-nav-primary">Create account</a>
-    </div>
   </div>
 </nav>
 
@@ -36,6 +33,7 @@
     </div>
 
     <form th:action="@{/login}" method="post">
+      <input type="hidden" th:name="${_csrf.parameterName}" th:value="${_csrf.token}">
 
       <div class="field">
         <label for="email">Email</label>

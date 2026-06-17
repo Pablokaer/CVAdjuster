@@ -479,3 +479,169 @@ h1 {
     border-radius: 50%;
     flex-shrink: 0;
 }
+
+@media (max-width: 720px) {
+    .wrapper {
+        max-width: none;
+        padding: 28px 16px 44px;
+    }
+
+    .back-link,
+    .new-btn {
+        width: 100%;
+        min-height: 46px;
+        justify-content: center;
+    }
+
+    .back-link {
+        margin-bottom: 28px;
+    }
+
+    .success-header {
+        text-align: center;
+        margin-bottom: 30px;
+    }
+
+    h1 {
+        font-size: 34px;
+    }
+
+    .subtitle {
+        margin: 0 auto;
+    }
+
+    .stats-row {
+        display: grid;
+        grid-template-columns: repeat(3, 1fr);
+        gap: 8px;
+        margin-top: 22px;
+        padding-top: 22px;
+    }
+
+    .stat {
+        min-width: 0;
+        padding: 12px 8px;
+        border: 1px solid var(--border);
+        border-radius: 12px;
+        background: rgba(255,255,255,0.02);
+        text-align: center;
+    }
+
+    .stat-value {
+        font-size: 17px;
+    }
+
+    .stat-label {
+        font-size: 10px;
+        word-break: break-word;
+    }
+
+    .actions-grid {
+        grid-template-columns: 1fr;
+        gap: 12px;
+    }
+
+    .action-card {
+        align-items: center;
+        text-align: center;
+        padding: 18px;
+        border-radius: 14px;
+    }
+
+    .action-desc {
+        flex: initial;
+    }
+
+    .action-btn {
+        width: 100%;
+        min-height: 44px;
+        justify-content: center;
+    }
+
+    .gdocs-tip {
+        padding: 16px;
+        line-height: 1.65;
+    }
+
+    .gdocs-tip .step-list li,
+    .gdocs-tip ol li {
+        margin-bottom: 8px;
+    }
+
+    .changes-toggle {
+        min-height: 54px;
+        padding: 14px 16px;
+        gap: 10px;
+        text-align: center;
+    }
+
+    .changes-toggle-label {
+        font-size: 12px;
+        line-height: 1.35;
+    }
+
+    .change-before,
+    .change-after {
+        padding: 14px;
+        font-size: 11.5px;
+        overflow-x: auto;
+    }
+
+    .change-reason {
+        padding: 12px 14px;
+    }
+
+    .keywords-grid {
+        padding: 12px;
+        gap: 6px;
+    }
+
+    .kw-tag {
+        max-width: 100%;
+        overflow-wrap: anywhere;
+    }
+
+    .keywords-legend {
+        flex-direction: column;
+        gap: 8px;
+    }
+
+    .panel {
+        border-radius: 16px;
+    }
+
+    .panel-header {
+        padding: 14px 16px;
+        gap: 12px;
+    }
+
+    .copy-btn {
+        min-height: 40px;
+        padding: 8px 12px;
+    }
+
+    .panel-body {
+        padding: 16px;
+    }
+
+    .resume-text {
+        max-height: 62vh;
+        font-size: 12px;
+        line-height: 1.7;
+        overflow-x: auto;
+    }
+}
+
+@media (max-width: 420px) {
+    .wrapper {
+        padding: 24px 12px 40px;
+    }
+
+    .stats-row {
+        grid-template-columns: 1fr;
+    }
+
+    .changes-toggle {
+        align-items: center;
+    }
+}
