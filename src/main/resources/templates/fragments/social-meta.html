@@ -1,0 +1,23 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org">
+<head>
+    <!-- Open Graph / Twitter link previews. Absolute URLs are required by chat crawlers. -->
+    <th:block th:fragment="meta(title, description)"
+              th:with="base=${@environment.getProperty('app.base-url').replaceAll('/+$', '')}">
+        <meta property="og:type" content="website">
+        <meta property="og:site_name" content="CV Fit AI">
+        <meta property="og:title" th:content="${title}">
+        <meta property="og:description" th:content="${description}">
+        <meta property="og:url" th:content="${base + '/'}">
+        <meta property="og:image" th:content="${base + '/images/og-image.png'}">
+        <meta property="og:image:type" content="image/png">
+        <meta property="og:image:width" content="1200">
+        <meta property="og:image:height" content="630">
+        <meta property="og:image:alt" content="CV Fit AI logo: a chameleon on a resume page">
+        <meta name="twitter:card" content="summary_large_image">
+        <meta name="twitter:title" th:content="${title}">
+        <meta name="twitter:description" th:content="${description}">
+        <meta name="twitter:image" th:content="${base + '/images/og-image.png'}">
+    </th:block>
+</head>
+</html>
