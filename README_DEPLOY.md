@@ -1,49 +1,55 @@
-Deploy rápido — passos essenciais
+# Deploy
 
-1) Verificar encoding dos recursos
+## Produção (cvfitai.com) — automático via GitHub Actions
 
-  # Dry run: lista arquivos que seriam convertidos
-  PowerShell:
-  ```powershell
-  .\scripts\convert-encoding.ps1 -DryRun
-  ```
+Todo push na `main` dispara `.github/workflows/deploy.yml`:
 
-  # Converter para UTF-8 (cria backups .bak)
-  ```powershell
-  .\scripts\convert-encoding.ps1
-  ```
+1. **Build** — `mvn verify` com JDK 21 (também roda em pull requests, sem deploy).
+2. **Deploy** — o jar é enviado por SSH para a VPS e instalado por `deploy/deploy.sh`, que guarda o
+   jar em `/opt/cvfitai/releases/`, aponta `current.jar` para ele, reinicia o serviço `cvfitai`
+   (systemd) e espera `/login` responder. Se a nova versão não ficar saudável, volta sozinho para a
+   release anterior e o job falha.
+3. **Smoke test** — `https://cvfitai.com/login` precisa responder 200.
 
-2) Build local com Maven (JDK 21 necessário)
+Também dá para rodar manualmente em *Actions → CI / Deploy → Run workflow*.
 
-  ```powershell
-  mvn -B -DskipTests package
-  ```
+### Na VPS
 
-3) Build da imagem Docker
+| Item | Onde |
+| --- | --- |
+| Releases / jar atual | `/opt/cvfitai/releases/`, `/opt/cvfitai/current.jar` |
+| Script de deploy | `/opt/cvfitai/deploy.sh` (cópia de `deploy/deploy.sh`) |
+| Serviço | `/etc/systemd/system/cvfitai.service` (cópia de `deploy/cvfitai.service`) |
+| Variáveis de ambiente (segredos) | `/home/cvfitai/.env` — fora do git, lido pelo systemd |
+| Log do app | `journalctl -u cvfitai -f` |
+| Log de deploy | `/var/log/cvfitai-deploy.log` |
 
-  ```powershell
-  docker build --progress=plain -t resumetailor:latest .
-  ```
+A chave SSH do GitHub Actions só consegue executar `deploy.sh` (`command=` + `restrict` no
+`authorized_keys`). Mudanças em `deploy/deploy.sh` ou `deploy/cvfitai.service` **não** são aplicadas
+automaticamente: copie os arquivos para a VPS quando alterá-los.
 
-4) Rodar local usando arquivo de ambiente (não comitar .env)
+### Secrets do repositório (Settings → Secrets and variables → Actions)
 
-  ```powershell
-  docker run -d --name resumetailor -p 8080:8080 --env-file .env -e SPRING_PROFILES_ACTIVE=prod resumetailor:latest
-  ```
+`VPS_HOST`, `VPS_USER`, `VPS_DEPLOY_KEY` (chave privada), `VPS_HOST_KEY` (chave pública do host, no
+formato `ssh-ed25519 AAAA…`). O job usa o environment `production`.
 
-5) Deploy com docker-compose (exemplo)
+### Rollback manual
 
-  ```powershell
-  docker-compose -f docker-compose.prod.yml --env-file .env up -d --build
-  ```
+```bash
+ls -1t /opt/cvfitai/releases/
+ln -sfn /opt/cvfitai/releases/cvfitai-<release>.jar /opt/cvfitai/current.jar
+systemctl restart cvfitai
+```
 
-6) CI/CD (resumo)
+## Local (Docker)
 
-  - Configure secrets no seu provider (Docker Hub, GHCR) e no GitHub Actions
-  - Workflow típico: checkout -> setup-java (jdk21) -> mvn package -> docker/build-push-action -> push
+```powershell
+docker compose up -d --build
+```
 
-Notas de segurança
-  - Nunca comite `.env` com segredos
-  - Preferir secret manager / Docker secrets / Kubernetes Secrets em produção
-  - Backup do banco antes de rodar migrações em produção
+Usa o `.env` da raiz (não comitar). Veja o `README.md`.
 
+## Segurança
+
+- Nunca comite `.env`.
+- Faça backup do banco antes de rodar migrações em produção.

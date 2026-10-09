@@ -1,0 +1,21 @@
+[Unit]
+Description=CV Fit AI (Spring Boot)
+After=network.target
+
+[Service]
+Type=simple
+User=cvfitai
+Group=cvfitai
+WorkingDirectory=/opt/cvfitai
+# Secrets (OPENAI_API_KEY, STRIPE_*, MAIL_*, DB_*, APP_BASE_URL, SERVER_PORT) live here, never in git.
+EnvironmentFile=/home/cvfitai/.env
+ExecStart=/usr/bin/java -Xms128m -Xmx512m -Djava.security.egd=file:/dev/./urandom -jar /opt/cvfitai/current.jar
+SuccessExitStatus=143
+Restart=on-failure
+RestartSec=10
+NoNewPrivileges=true
+PrivateTmp=true
+ProtectSystem=full
+
+[Install]
+WantedBy=multi-user.target

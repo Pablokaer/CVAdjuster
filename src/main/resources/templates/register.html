@@ -6,7 +6,7 @@
   <title>Create Account — CV FIT AI</title>
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-  <link href="https://fonts.googleapis.com/css2?family=Epilogue:wght@400;500;600;700;800&family=Figtree:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+  <link href="https://fonts.googleapis.com/css2?family=Sora:wght@400;600;700;800&family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet">
   <link rel="icon" type="image/png" th:href="@{/favicon.png}">
   <link rel="stylesheet" th:href="@{/css/base.css}">
 </head>
@@ -14,7 +14,7 @@
 
 <nav class="topbar auth-topbar">
   <div class="topbar-inner">
-    <a href="/" class="topbar-brand">CV FIT AI</a>
+    <a href="/" class="topbar-brand" aria-label="CV Fit AI — home"><img class="brand-icon" th:src="@{/images/logo-icon.png}" alt="" width="42" height="46"><img class="brand-word" th:src="@{/images/font.png}" alt="CV Fit AI" width="99" height="19"></a>
   </div>
 </nav>
 
@@ -24,8 +24,8 @@
 <div class="auth-wrapper">
   <div class="card" style="max-width:420px; width:100%;">
 
-    <h2 style="font-family:'Epilogue',sans-serif; font-weight:700; font-size:22px; margin-bottom:6px;">Create account</h2>
-    <p style="color:var(--text-muted); font-size:14px; margin-bottom:24px; text-transform:none; letter-spacing:0; font-family:'Figtree',sans-serif;">Start tailoring your resume with AI</p>
+    <h2 style="font-family:'Sora',sans-serif; font-weight:700; font-size:22px; margin-bottom:6px;">Create account</h2>
+    <p style="color:var(--text-muted); font-size:14px; margin-bottom:24px; text-transform:none; letter-spacing:0; font-family:'Inter',sans-serif;">Start tailoring your resume with AI</p>
 
     <div th:if="${error}" class="alert alert-error">
       <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="10"/><line x1="12" y1="8" x2="12" y2="12"/><line x1="12" y1="16" x2="12.01" y2="16"/></svg>
@@ -50,11 +50,11 @@
 
     </form>
 
-    <p style="text-align:center; font-size:13px; color:var(--text-muted); margin-top:20px; font-family:'Figtree',sans-serif; text-transform:none; letter-spacing:0;">
+    <p style="text-align:center; font-size:13px; color:var(--text-muted); margin-top:20px; font-family:'Inter',sans-serif; text-transform:none; letter-spacing:0;">
       Already have an account? <a href="/login" style="color:var(--accent); text-decoration:none;">Sign in</a>
     </p>
 
-    <p style="text-align:center; font-size:13px; margin-top:10px; font-family:'Figtree',sans-serif; text-transform:none; letter-spacing:0;">
+    <p style="text-align:center; font-size:13px; margin-top:10px; font-family:'Inter',sans-serif; text-transform:none; letter-spacing:0;">
       <a href="/forgot-password" style="color:var(--text-muted); text-decoration:none; transition:color 0.2s;"
          onmouseover="this.style.color='var(--accent)'" onmouseout="this.style.color='var(--text-muted)'">
         Forgot your password?

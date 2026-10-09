@@ -6,7 +6,7 @@
   <title>About — CV FIT AI</title>
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-  <link href="https://fonts.googleapis.com/css2?family=Epilogue:wght@400;500;600;700;800&family=Figtree:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+  <link href="https://fonts.googleapis.com/css2?family=Sora:wght@400;600;700;800&family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet">
   <link rel="stylesheet" th:href="@{/css/base.css}">
   <link rel="stylesheet" th:href="@{/css/index.css}">
   <style>
@@ -16,15 +16,16 @@
     .about-section h3 {
       font-size: 20px;
       font-weight: 600;
-      color: rgba(255,255,255,.92);
+      color: var(--navy);
       margin: 28px 0 14px;
       letter-spacing: -0.01em;
     }
+    .about-section:first-of-type { margin-top: 0; }
     .about-section:first-of-type h3 {
       margin-top: 0;
     }
     .about-section p {
-      color: rgba(255,255,255,.75);
+      color: var(--text-2);
       line-height: 1.7;
       margin: 14px 0;
       font-size: 15px;
@@ -35,7 +36,7 @@
       margin: 16px 0;
     }
     .about-section li {
-      color: rgba(255,255,255,.75);
+      color: var(--text-2);
       margin: 12px 0;
       padding-left: 24px;
       position: relative;
@@ -50,7 +51,7 @@
       font-weight: 600;
     }
     .about-section li strong {
-      color: rgba(255,255,255,.92);
+      color: var(--navy);
     }
     .cta-section {
       margin-top: 48px;
@@ -59,13 +60,13 @@
       flex-wrap: wrap;
     }
     .highlight-box {
-      background: rgba(124,92,255,.08);
-      border: 1px solid rgba(124,92,255,.22);
+      background: var(--mint-faint);
+      border: 1px solid #BFEDE4;
       padding: 14px 14px;
       margin: 16px 0;
-      border-radius: 8px;
+      border-radius: 14px;
       font-size: 14px;
-      color: rgba(255,255,255,.80);
+      color: var(--text-2);
     }
     @media (max-width: 720px) {
       .about-section {
@@ -107,7 +108,7 @@
 
 <nav class="topbar">
   <div class="topbar-inner">
-    <a href="/" class="topbar-brand">CV FIT AI</a>
+    <a href="/" class="topbar-brand" aria-label="CV Fit AI — home"><img class="brand-icon" th:src="@{/images/logo-icon.png}" alt="" width="42" height="46"><img class="brand-word" th:src="@{/images/font.png}" alt="CV Fit AI" width="99" height="19"></a>
     <div class="topbar-actions">
       <a href="/" class="btn-nav-outline">← Back to Home</a>
     </div>
@@ -194,8 +195,8 @@
     </div>
   </div>
 
-  <footer style="text-align: center; margin-top: 48px; color: rgba(255,255,255,.30); font-size: 13px;">
-    Questions? <a href="/" style="color: rgba(124,92,255,.8); text-decoration: none;">Contact us</a> for support.
+  <footer style="text-align: center; margin-top: 48px; color: var(--text-2); font-size: 13px;">
+    Questions? <a href="/" style="color: var(--teal-dark); text-decoration: none; font-weight: 600;">Contact us</a> for support.
   </footer>
 
 </div>

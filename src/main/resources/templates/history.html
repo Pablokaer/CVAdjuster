@@ -10,7 +10,7 @@
 
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-    <link href="https://fonts.googleapis.com/css2?family=Epilogue:wght@400;500;600;700;800&family=Figtree:wght@300;400;500;600;700&family=DM+Mono:wght@400;500&display=swap" rel="stylesheet">
+    <link href="https://fonts.googleapis.com/css2?family=Sora:wght@400;600;700;800&family=Inter:wght@300;400;500;600;700&family=DM+Mono:wght@400;500&display=swap" rel="stylesheet">
 
     <link rel="icon" type="image/png" th:href="@{/favicon.png}">
     <link rel="stylesheet" th:href="@{/css/base.css}">
@@ -21,7 +21,7 @@
 
 <nav class="topbar">
     <div class="topbar-inner">
-        <a href="/" class="topbar-brand">CV FIT AI</a>
+        <a href="/" class="topbar-brand" aria-label="CV Fit AI — home"><img class="brand-icon" th:src="@{/images/logo-icon.png}" alt="" width="42" height="46"><img class="brand-word" th:src="@{/images/font.png}" alt="CV Fit AI" width="99" height="19"></a>
 
         <div class="topbar-actions">
             <div sec:authorize="isAuthenticated()" class="user-menu">

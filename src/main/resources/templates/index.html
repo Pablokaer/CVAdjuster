@@ -5,32 +5,46 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>CV FIT AI — AI-Powered Resume Builder</title>
+    <title>CV Fit AI — Your resume, built for the job</title>
+    <meta name="description" content="Upload your resume, paste the job description and get a tailored, ATS-friendly resume in seconds.">
+    <meta name="theme-color" content="#FAFAF7">
 
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-    <link href="https://fonts.googleapis.com/css2?family=Epilogue:wght@400;500;600;700;800&family=Figtree:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+    <link href="https://fonts.googleapis.com/css2?family=Sora:wght@400;600;700;800&family=Inter:wght@400;500;600&display=swap" rel="stylesheet">
 
     <link rel="icon" type="image/png" th:href="@{/favicon.png}">
-    <link rel="stylesheet" th:href="@{/css/base.css}">
-    <link rel="stylesheet" th:href="@{/css/index.css}">
+    <link rel="apple-touch-icon" th:href="@{/images/logo-icon.png}">
+    <link rel="stylesheet" th:href="@{/css/landing.css}">
 </head>
 
 <body>
 
-<nav class="topbar home-topbar">
-    <div class="topbar-inner">
-        <a href="/" class="topbar-brand">CV FIT AI</a>
-    </div>
-</nav>
+<a href="#main" class="skip-link">Skip to content</a>
 
-<div class="orb orb-1"></div>
-<div class="orb orb-2"></div>
+<!-- ============ BACKGROUND DECORATIONS ============ -->
+<div class="bg-decor" aria-hidden="true">
+    <svg class="blob blob-tl" viewBox="0 0 520 560" preserveAspectRatio="none">
+        <path d="M0 40C70 10 150 70 190 140c40 70 120 60 170 120 60 72 20 150-40 190-70 47-120 100-210 110C60 570 0 520 0 470z" fill="#BFF0E6" opacity=".55"/>
+        <path d="M0 120c50-20 110 20 130 70s-10 90-60 120c-30 18-50 50-70 60z" fill="#8FEDE0" opacity=".45"/>
+    </svg>
+    <svg class="blob blob-l" viewBox="0 0 300 420" preserveAspectRatio="none">
+        <path d="M0 40c60-30 120 20 130 80s-40 90-30 150 70 60 60 110c-8 40-80 40-160 30z" fill="#DDF8F3" opacity=".9"/>
+        <ellipse cx="40" cy="60" rx="40" ry="34" fill="#BFF0E6" opacity=".6"/>
+    </svg>
+    <svg class="blob blob-tr" viewBox="0 0 520 360" preserveAspectRatio="none">
+        <path d="M520 0v260c-70 30-120-20-170-60-40-32-20-80-80-110C220 66 210 20 250 0z" fill="#DDF8F3" opacity=".8"/>
+    </svg>
+    <svg class="blob blob-mid" viewBox="0 0 900 700" preserveAspectRatio="none">
+        <path d="M120 80c90-60 230-40 320 20 80 54 130 150 100 250-30 98-140 140-240 150-110 10-210-40-250-130-40-90-20-220 70-290z" fill="#DDF8F3" opacity=".7"/>
+        <path d="M520 360c60-40 150-20 200 30s60 130 10 180-130 70-200 40-80-110-60-170c10-40 20-60 50-80z" fill="#CFF4EC" opacity=".6"/>
+    </svg>
+</div>
 
-<div class="loading-overlay" id="loadingOverlay">
+<!-- ============ LOADING OVERLAY (authenticated flow) ============ -->
+<div class="loading-overlay" id="loadingOverlay" role="status" aria-live="polite">
     <div class="spinner"></div>
     <div class="loading-text">Processing your resume...</div>
-
     <div class="loading-steps">
         <div class="loading-step active" id="step-extract">Extracting resume</div>
         <div class="loading-step" id="step-ai">Analyzing with AI</div>
@@ -38,235 +52,404 @@
     </div>
 </div>
 
-<div class="wrapper">
+<!-- ============ HEADER ============ -->
+<header class="site-header">
+    <div class="site-header-inner">
+        <a href="/" class="brand" aria-label="CV Fit AI — home">
+            <img class="brand-icon" th:src="@{/images/logo-icon.png}" alt="" width="44" height="48">
+            <img class="brand-word" th:src="@{/images/font.png}" alt="CV Fit AI" width="109" height="21">
+        </a>
 
-    <div class="page-actions">
-        <div class="topbar-actions">
+        <button type="button" class="nav-toggle" id="navToggle" aria-expanded="false" aria-controls="siteNav" aria-label="Open menu">
+            <span></span><span></span><span></span>
+        </button>
 
-            <a href="/about" class="btn-nav-outline">About this project</a>
+        <div class="nav-panel" id="siteNav">
+            <nav class="main-nav" aria-label="Main">
+                <a href="/about">About</a>
+                <a href="/#how-it-works">How it works</a>
+                <a href="/#pricing">Pricing</a>
+                <a href="/#faq">FAQ</a>
+            </nav>
 
-            <div sec:authorize="!isAuthenticated()" class="auth-action-group">
-                <a href="/register" class="btn-nav-primary">Create account</a>
-                <a href="/login" class="btn-nav-outline">Login</a>
+            <div class="auth-actions" sec:authorize="!isAuthenticated()">
+                <a href="/login" class="btn btn-light">Log in</a>
+                <a href="/register" class="btn btn-navy">Create account <span aria-hidden="true">→</span></a>
             </div>
 
-            <div sec:authorize="isAuthenticated()" class="user-menu">
-
-                <span class="credits-badge">
-                    <svg xmlns="http://www.w3.org/2000/svg" width="11" height="11" viewBox="0 0 24 24" fill="currentColor" aria-hidden="true"><path d="M13 2L3 14h9l-1 8 10-12h-9l1-8z"/></svg>
-                    <span th:text="${userCredits != null ? userCredits : 0}">0</span>
-                    <span>credits</span>
+            <div class="auth-actions user-area" sec:authorize="isAuthenticated()">
+                <span class="credits-pill">
+                    <svg width="12" height="12" viewBox="0 0 24 24" fill="currentColor" aria-hidden="true"><path d="M13 2L3 14h9l-1 8 10-12h-9l1-8z"/></svg>
+                    <span th:text="${userCredits != null ? userCredits : 0}">0</span> credits
                 </span>
-
-                <a href="/credits" class="btn-add-credits">+ Add Credits</a>
-
-                <a href="/history" class="btn-nav-outline" style="display:inline-flex; align-items:center; gap:6px;">
-                    <svg xmlns="http://www.w3.org/2000/svg" width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><circle cx="12" cy="12" r="10"/><polyline points="12 6 12 12 16 14"/></svg>
-                    History
-                </a>
-
-                <img class="user-avatar"
-                     th:if="${#authentication.principal instanceof T(org.springframework.security.oauth2.core.user.OAuth2User)}"
-                     th:src="${#authentication.principal.attributes['picture']}"
-                     onerror="this.style.display='none'"/>
-
-                <span class="user-name" th:text="${#authentication.name}">
-                    user@email.com
-                </span>
-
+                <a href="/credits" class="btn btn-light">+ Add credits</a>
+                <a href="/history" class="btn btn-light">History</a>
                 <form th:action="@{/logout}" method="post">
-                    <button type="submit" class="btn-logout">Sign out</button>
+                    <button type="submit" class="btn btn-navy">Sign out</button>
                 </form>
             </div>
         </div>
     </div>
+</header>
 
-    <header>
-        <div class="badge">Powered by OpenAI</div>
+<main id="main">
+<div class="hero-zone">
+<svg class="waves" viewBox="0 0 1440 260" preserveAspectRatio="none">
+        <path d="M0 140c120-60 220-40 330 0s210 90 330 50 190-100 320-80 290 90 460 20v130H0z" fill="#DDF8F3"/>
+        <path d="M0 190c140-50 250-10 360 20s220 40 340 0 220-90 360-60 260 70 380 30v80H0z" fill="#BFF0E6"/>
+        <path d="M0 225c160-30 280 10 420 10s260-50 400-40 300 60 620 0v65H0z" fill="#8FEDE0" opacity=".7"/>
+        <path d="M0 250c200-10 330 20 520 10s420-30 920 0v10H0z" fill="#008C88" opacity=".35"/>
+    </svg>
 
-        <h1>
-            Your resume,<br>
-            <span class="highlight">built for the job</span>
+<!-- ============ HERO ============ -->
+<section class="hero">
+    <div class="hero-copy">
+        <span class="badge"><span aria-hidden="true">✦</span> POWERED BY OPENAI</span>
+
+        <h1 class="hero-title">
+            <span class="t-navy">Your resume,</span>
+            <span class="t-teal">built for the job.</span>
         </h1>
 
-        <p class="subtitle">
-            Upload your resume and paste the job description.
-            AI rewrites everything while keeping your identity.
+        <p class="hero-lead">
+            Upload your resume and paste the job description.<br>
+            AI rewrites everything while keeping your identity.<br>
+            Get a tailored, ATS-friendly resume in seconds.
         </p>
 
-        <div class="steps">
-            <div class="step"><span class="step-num">1</span> Upload resume</div>
-            <div class="step"><span class="step-num">2</span> Paste job post</div>
-            <div class="step"><span class="step-num">3</span> Download result</div>
+        <ol class="steps" aria-label="How it works in three steps">
+            <li class="step">
+                <span class="step-num">1</span>
+                <span class="step-icon" aria-hidden="true">
+                    <svg viewBox="0 0 24 24"><path d="M14 3H7a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h10a2 2 0 0 0 2-2V8z"/><path d="M14 3v5h5"/><path d="M9 13h6M9 17h4"/></svg>
+                </span>
+                <span class="step-label">Upload<br>resume</span>
+            </li>
+            <li class="step-arrow" aria-hidden="true">→</li>
+            <li class="step">
+                <span class="step-num">2</span>
+                <span class="step-icon" aria-hidden="true">
+                    <svg viewBox="0 0 24 24"><path d="M10 14a4 4 0 0 0 5.7 0l3-3a4 4 0 0 0-5.7-5.7l-1 1"/><path d="M14 10a4 4 0 0 0-5.7 0l-3 3A4 4 0 0 0 11 18.7l1-1"/></svg>
+                </span>
+                <span class="step-label">Paste<br>job post</span>
+            </li>
+            <li class="step-arrow" aria-hidden="true">→</li>
+            <li class="step">
+                <span class="step-num">3</span>
+                <span class="step-icon" aria-hidden="true">
+                    <svg viewBox="0 0 24 24"><path d="M12 4v11"/><path d="m7 11 5 5 5-5"/><path d="M5 20h14"/></svg>
+                </span>
+                <span class="step-label">Download<br>result</span>
+            </li>
+        </ol>
+
+        <div th:if="${param.error}" class="alert alert-error" role="alert">Error processing request</div>
+        <div th:if="${noCredits}" class="alert alert-credits" role="alert">
+            <span th:text="${error}">You don't have enough credits.</span>
+            <a href="/credits">Add credits →</a>
         </div>
-    </header>
 
-    <div th:if="${param.error}" class="alert alert-error">
-        <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><circle cx="12" cy="12" r="10"/><line x1="12" y1="8" x2="12" y2="12"/><line x1="12" y1="16" x2="12.01" y2="16"/></svg>
-        Error processing request
-    </div>
-
-    <!-- Shown when the user submits with 0 credits -->
-    <div th:if="${noCredits}" class="alert alert-no-credits">
-        <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="currentColor" aria-hidden="true"><path d="M13 2L3 14h9l-1 8 10-12h-9l1-8z"/></svg>
-        <span th:text="${error}">You don't have enough credits.</span>
-        <a href="/credits" class="alert-credits-link">Add Credits →</a>
-    </div>
-
-    <div class="card"
-         sec:authorize="!isAuthenticated()"
-         style="text-align:center; padding: 56px 40px;">
-
-        <!--<div style="font-size:48px; margin-bottom:20px;">✦</div>-->
-
-        <h2 style="font-family:'Epilogue'; font-weight:700;">
-            Get started for free
-        </h2>
-
-        <p style="color:var(--text-muted); margin:20px 0;">
-            Sign in to tailor your resume with AI in seconds.
-        </p>
-
-        <div style="display:flex; flex-direction:column; gap:12px; max-width:320px; margin:auto;">
-
-            <a href="/register" class="btn-submit" style="text-decoration:none; width:100%; text-align:center;">
-                Sign Up
-            </a>
-
-            <a href="/login"
-               class="btn-nav-outline"
-               style="text-decoration:none; display:flex; align-items:center; justify-content:center; font-size: 15px; width:100%;">
-                Login
-            </a>
-        </div>
-    </div>
-
-    <div class="card" sec:authorize="isAuthenticated()">
-
-        <form th:action="@{/tailor}"
-              method="post"
-              enctype="multipart/form-data"
-              id="tailorForm">
-
-            <div class="form-grid">
-
-                <div class="field full">
-                    <label>Resume (PDF ou DOCX)</label>
-
-                    <div class="upload-zone" id="uploadZone">
-                        <input type="file"
-                               name="resumeFile"
-                               id="resumeFile"
-                               accept=".pdf,.doc,.docx"
-                               required>
-
-                        <span class="upload-icon">📄</span>
-
-                        <div class="upload-text">
-                            Click or drag file
-                        </div>
-
-                        <div class="file-selected" id="fileSelected">
-                            ✓ <span id="fileName"></span>
-                        </div>
-                    </div>
+        <!-- Anonymous: CTA card -->
+        <div class="cta-card" sec:authorize="!isAuthenticated()">
+            <svg class="cta-camo" viewBox="0 0 700 260" preserveAspectRatio="xMidYMid slice" aria-hidden="true">
+                <path d="M520 0c60 20 140 10 180 40v90c-60-30-90 30-150 20s-60-80-110-90S440-10 520 0z" fill="#0B4A5C" opacity=".55"/>
+                <path d="M0 160c50-30 100 20 130 60s20 40-10 40H0z" fill="#0B4A5C" opacity=".5"/>
+                <path d="M300 230c60-30 120 10 200 0s120 10 200-20v50H300z" fill="#006F73" opacity=".35"/>
+                <path d="M40 0c40 30 20 80 70 90S150 40 190 0z" fill="#0A3A52" opacity=".6"/>
+            </svg>
+            <div class="cta-body">
+                <h2>Get started for free</h2>
+                <p>Sign in to tailor your resume with AI in seconds.</p>
+                <div class="cta-buttons">
+                    <a href="/register" class="btn btn-mint btn-lg">Create account <span aria-hidden="true">→</span></a>
+                    <a href="/login" class="btn btn-ghost btn-lg">Log in</a>
                 </div>
-
-                <div class="field full">
-                    <label>Job Description</label>
-
-                    <textarea name="jobDescription"
-                              id="jobDescription"
-                              placeholder="Paste the job description here..."
-                              required
-                              oninput="updateWordCount(this)"></textarea>
-                    <small id="jd-word-count" style="color: var(--text-muted, #888);">0 / 3,000 words</small>
-                </div>
-
-                <!--
-                <div class="field full">
-                    <label>Output Format</label>
-
-                    <div class="format-options">
-                        <div class="format-option">
-                            <input type="radio" name="outputFormat" id="fmt-pdf" value="pdf" checked>
-                            <label class="format-label" for="fmt-pdf">
-                                <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><polyline points="14 2 14 8 20 8"/><line x1="16" y1="13" x2="8" y2="13"/><line x1="16" y1="17" x2="8" y2="17"/></svg>
-                                PDF
-                            </label>
-                        </div>
-                        <div class="format-option">
-                            <input type="radio" name="outputFormat" id="fmt-docx" value="docx">
-                            <label class="format-label" for="fmt-docx">
-                                <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><polyline points="14 2 14 8 20 8"/><path d="M8 13h8M8 17h5"/></svg>
-                                DOCX
-                            </label>
-                        </div>
-                    </div>
-                </div>
-                -->
-
-                <div class="field full">
-                    <button type="submit"
-                            class="btn-submit"
-                            id="submitBtn">
-                        ✦ CV FIT AI
-                    </button>
-                </div>
-
             </div>
-        </form>
+        </div>
 
+        <!-- Authenticated: tailoring form -->
+        <div class="cta-card form-card" sec:authorize="isAuthenticated()">
+            <form th:action="@{/tailor}" method="post" enctype="multipart/form-data" id="tailorForm">
+                <h2>Tailor your resume</h2>
+
+                <div class="field">
+                    <label for="resumeFile">Resume (PDF or DOCX)</label>
+                    <div class="upload-zone" id="uploadZone">
+                        <input type="file" name="resumeFile" id="resumeFile" accept=".pdf,.doc,.docx" required>
+                        <span class="upload-text">Click or drag your file here</span>
+                        <span class="file-selected" id="fileSelected">✓ <span id="fileName"></span></span>
+                    </div>
+                </div>
+
+                <div class="field">
+                    <label for="jobDescription">Job description</label>
+                    <textarea name="jobDescription" id="jobDescription" rows="5"
+                              placeholder="Paste the job description here..." required
+                              oninput="updateWordCount(this)"></textarea>
+                    <small id="jd-word-count">0 / 3,000 words</small>
+                </div>
+
+                <button type="submit" class="btn btn-mint btn-lg btn-block" id="submitBtn">✦ Tailor my resume</button>
+            </form>
+        </div>
+
+        <ul class="trust">
+            <li>
+                <span class="trust-icon" aria-hidden="true"><svg viewBox="0 0 24 24"><path d="M12 3 5 6v5c0 4.5 3 8 7 10 4-2 7-5.5 7-10V6z"/><path d="m9 12 2 2 4-4"/></svg></span>
+                <span><strong>Keep your identity</strong><small>Built to keep your facts and voice.</small></span>
+            </li>
+            <li>
+                <span class="trust-icon" aria-hidden="true"><svg viewBox="0 0 24 24"><path d="M13 2 4 14h7l-1 8 9-12h-7z"/></svg></span>
+                <span><strong>ATS-friendly</strong><small>Uses the job's own keywords.</small></span>
+            </li>
+            <li>
+                <span class="trust-icon" aria-hidden="true"><svg viewBox="0 0 24 24"><rect x="5" y="11" width="14" height="10" rx="2"/><path d="M8 11V8a4 4 0 0 1 8 0v3"/></svg></span>
+                <span><strong>Secure account</strong><small>Hashed passwords, private downloads.</small></span>
+            </li>
+        </ul>
     </div>
 
-    <footer>
-        CV FIT AI · Spring Boot + AI
-    </footer>
+    <!-- ============ HERO ILLUSTRATION ============ -->
+    <div class="hero-art" aria-hidden="true">
+        <div class="stage">
+            <img class="chameleon" th:src="@{/images/chameleon.png}" alt="" width="560" height="565">
 
-</div>
+            <svg class="flow-arrows" viewBox="0 0 62 76">
+                <g fill="none" stroke="#082B43" stroke-width=".26" stroke-linecap="round" stroke-linejoin="round">
+                    <path d="M24.500 33.500C28.800 34 30.200 37 29.500 40.200"/>
+                    <path d="M28.500 39l1 1.400 1.100-1.500"/>
+                    <path d="M36.800 33.800C33 33.600 31.600 37 32.200 40.200"/>
+                    <path d="M31 39l1.200 1.500.9-1.600"/>
+                    <path d="M31 48.200v2.600"/>
+                    <path d="M30 49.800l1 1.200 1-1.200"/>
+                </g>
+                <g fill="none" stroke="#008C88" stroke-width=".22" stroke-linecap="round" stroke-linejoin="round">
+                    <path d="M8.400 46.800l1.300 1.900M5.600 49.700l2.100.6M6.800 53l1.700-.7"/>
+                    <path d="M47.800 57c-.2-3 1.800-5.400 6.200-5.200"/>
+                    <path d="M49.300 56.200l-1.500 1.200-1.200-1.600"/>
+                </g>
+            </svg>
+
+            <!-- Resume card -->
+            <div class="card card-resume float f1">
+                <div class="card-head"><span class="chip-icon"><svg viewBox="0 0 24 24"><path d="M14 3H7a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h10a2 2 0 0 0 2-2V8z"/><path d="M14 3v5h5"/></svg></span> Your Resume</div>
+                <div class="doc">
+                    <b>Alex Chen</b><span>Product Designer</span>
+                    <i class="ln w90"></i><i class="ln w70"></i>
+                    <div class="bul"><i class="dot"></i><i class="ln w80"></i></div>
+                    <div class="bul"><i class="dot"></i><i class="ln w75"></i></div>
+                    <div class="bul"><i class="dot"></i><i class="ln w60"></i></div>
+                </div>
+            </div>
+
+            <div class="file-chip float f2">
+                <span class="chip-icon"><svg viewBox="0 0 24 24"><path d="M14 3H7a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h10a2 2 0 0 0 2-2V8z"/><path d="M14 3v5h5"/><path d="M9 13h6M9 17h6"/></svg></span>
+                <span class="file-meta"><b>Alex_Chen_Resume.pdf</b><small>2.4 MB · PDF</small></span>
+                <span class="ok"><svg viewBox="0 0 24 24"><path d="m6 12.500 4 4 8-9"/></svg></span>
+            </div>
+
+            <!-- Job description card -->
+            <div class="card card-job float f3">
+                <div class="card-head"><span class="chip-icon"><svg viewBox="0 0 24 24"><path d="M10 14a4 4 0 0 0 5.700 0l3-3a4 4 0 0 0-5.700-5.700l-1 1"/><path d="M14 10a4 4 0 0 0-5.700 0l-3 3A4 4 0 0 0 11 18.700l1-1"/></svg></span> Job Description</div>
+                <div class="doc">
+                    <b>Senior Product Designer</b><span>Acme Inc.</span>
+                    <i class="ln w95"></i><i class="ln w85"></i><i class="ln w90"></i><i class="ln w55"></i>
+                    <div class="src"><svg viewBox="0 0 24 24"><path d="M10 14a4 4 0 0 0 5.700 0l3-3a4 4 0 0 0-5.700-5.700l-1 1"/><path d="M14 10a4 4 0 0 0-5.700 0l-3 3A4 4 0 0 0 11 18.700l1-1"/></svg> https://acme.co/jobs/123</div>
+                </div>
+            </div>
+
+            <!-- AI badge -->
+            <div class="ai-badge float f4">
+                <svg class="spark" viewBox="0 0 24 24"><path d="M12 2c.6 4.500 2.500 7 8 8-5.500 1-7.400 3.500-8 8-.6-4.500-2.500-7-8-8 5.500-1 7.400-3.500 8-8z" fill="currentColor"/><path d="M19 15c.3 2 1 3 3 3.500-2 .5-2.700 1.500-3 3.500-.3-2-1-3-3-3.500 2-.5 2.700-1.500 3-3.500z" fill="currentColor"/></svg>
+                <span>AI Tailors<br>Your Resume</span>
+            </div>
+
+            <!-- Tailored resume card -->
+            <div class="card card-out float f5">
+                <div class="card-head"><span class="chip-icon"><svg viewBox="0 0 24 24"><path d="M14 3H7a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h10a2 2 0 0 0 2-2V8z"/><path d="M14 3v5h5"/></svg></span> Your Tailored Resume
+                    <span class="matched">✓ Job Matched</span>
+                </div>
+                <div class="doc out">
+                    <div class="out-left">
+                        <b>Alex Chen</b><span>Product Designer</span>
+                        <i class="ln hl w90"></i><i class="ln hl w65"></i>
+                        <div class="bul"><i class="dot hl"></i><i class="ln hl2 w80"></i></div>
+                        <div class="bul"><i class="dot hl"></i><i class="ln hl2 w70"></i></div>
+                        <div class="bul"><i class="dot hl"></i><i class="ln hl2 w75"></i></div>
+                    </div>
+                    <div class="out-right"><i class="ln w90"></i><i class="ln w70"></i><i class="ln w85"></i><i class="ln w55"></i><i class="ln w75"></i></div>
+                </div>
+            </div>
+
+            <ul class="checklist">
+                <li><span class="ck">✓</span> Tailored to the job</li>
+                <li><span class="ck">✓</span> ATS-friendly</li>
+                <li><span class="ck">✓</span> Keeps your voice</li>
+                <li><span class="ck">✓</span> Ready in seconds</li>
+            </ul>
+        </div>
+    </div>
+</section>
+
+<!-- ============ FACTS ROW ============ -->
+<section class="facts" aria-label="What you get">
+    <p class="facts-title">WHAT YOU GET</p>
+    <ul>
+        <li><strong>PDF or DOCX</strong> upload, up to 10 MB</li>
+        <li><strong>PDF + DOCX</strong> download of every result</li>
+        <li><strong>History</strong> of your generated resumes</li>
+        <li><strong>1 free credit</strong> when you sign up</li>
+        <li><strong>Auto refund</strong> if processing fails</li>
+    </ul>
+</section>
+
+</div><!-- /hero-zone -->
+
+<!-- ============ HOW IT WORKS ============ -->
+<section class="section" id="how-it-works">
+    <div class="section-inner">
+        <p class="eyebrow">HOW IT WORKS</p>
+        <h2 class="section-title">From generic resume to a match in three steps</h2>
+        <div class="how-grid">
+            <article class="how-card">
+                <span class="step-num">1</span>
+                <h3>Upload your resume</h3>
+                <p>Add your current resume as a PDF or DOCX file. Text is extracted so the AI can work with your real experience.</p>
+            </article>
+            <article class="how-card">
+                <span class="step-num">2</span>
+                <h3>Paste the job post</h3>
+                <p>Drop in the job description (up to 3,000 words). The AI picks up the role's keywords and priorities.</p>
+            </article>
+            <article class="how-card">
+                <span class="step-num">3</span>
+                <h3>Download the result</h3>
+                <p>Get a rewritten resume with a summary of the changes and the keywords used, as PDF and DOCX. Each generation uses 1 credit.</p>
+            </article>
+        </div>
+    </div>
+</section>
+
+<!-- ============ PRICING ============ -->
+<section class="section section-tint" id="pricing">
+    <div class="section-inner">
+        <p class="eyebrow">PRICING</p>
+        <h2 class="section-title">Pay only for the resumes you generate</h2>
+        <p class="section-lead">New accounts start with 1 free credit. Credits are one-time purchases, with no subscription.</p>
+        <div class="price-grid">
+            <article class="price-card" th:each="plan : ${T(com.resumetailor.payment.entity.CreditPlan).values()}"
+                     th:classappend="${plan.featured} ? 'featured' : ''">
+                <span class="price-flag" th:if="${plan.featured}">Most popular</span>
+                <h3 th:text="${plan.displayName}">Pro</h3>
+                <p class="price" th:text="${plan.displayPrice}">€5.99</p>
+                <p class="price-sub"><span th:text="${plan.resumesIncluded}">8</span> resumes · <span th:text="${plan.costPerResume}">€0.75 per resume</span></p>
+                <a th:href="@{/credits}" sec:authorize="isAuthenticated()" class="btn btn-navy btn-block">Buy credits</a>
+                <a th:href="@{/register}" sec:authorize="!isAuthenticated()" class="btn btn-navy btn-block">Create account</a>
+            </article>
+        </div>
+    </div>
+</section>
+
+<!-- ============ FAQ ============ -->
+<section class="section" id="faq">
+    <div class="section-inner narrow">
+        <p class="eyebrow">FAQ</p>
+        <h2 class="section-title">Frequently asked questions</h2>
+        <details class="faq">
+            <summary>Which file formats can I upload?</summary>
+            <p>PDF and DOCX files up to 10 MB. Scanned PDFs may fail, because the text has to be selectable.</p>
+        </details>
+        <details class="faq">
+            <summary>Will the AI invent experience I don't have?</summary>
+            <p>The AI is instructed not to invent experiences, certifications or skills. It reworks the wording and emphasis of what is already in your resume. Always review the result before sending it.</p>
+        </details>
+        <details class="faq">
+            <summary>What happens to my resume?</summary>
+            <p>Your resume text and the job description are sent to OpenAI to generate the tailored version. Generated files are temporary and removed automatically, and the result is saved in your account history.</p>
+        </details>
+        <details class="faq">
+            <summary>How do credits work?</summary>
+            <p>Each generation uses 1 credit. New accounts get 1 free credit, and if processing fails the credit is refunded automatically. Extra credits are available through Stripe checkout.</p>
+        </details>
+        <details class="faq">
+            <summary>Does ATS-friendly mean I will get the job?</summary>
+            <p>No tool can promise that. CV Fit AI aligns your resume with the job's keywords and avoids formatting that ATS software handles poorly, which helps your resume get read.</p>
+        </details>
+    </div>
+</section>
+
+</main>
+
+<footer class="site-footer">
+    <div class="site-footer-inner">
+        <a href="/" class="brand" aria-label="CV Fit AI — home">
+            <img class="brand-icon" th:src="@{/images/logo-icon.png}" alt="" width="32" height="35">
+            <img class="brand-word" th:src="@{/images/font.png}" alt="CV Fit AI" width="78" height="15">
+        </a>
+        <nav aria-label="Footer">
+            <a href="/about">About</a>
+            <a href="/#pricing">Pricing</a>
+            <a href="/#faq">FAQ</a>
+            <a href="/login" sec:authorize="!isAuthenticated()">Log in</a>
+        </nav>
+        <p>© CV Fit AI</p>
+    </div>
+</footer>
 
 <script>
+    (function () {
+        var toggle = document.getElementById('navToggle');
+        var panel = document.getElementById('siteNav');
+        if (toggle && panel) {
+            toggle.addEventListener('click', function () {
+                var open = panel.classList.toggle('open');
+                toggle.setAttribute('aria-expanded', open);
+                toggle.setAttribute('aria-label', open ? 'Close menu' : 'Open menu');
+            });
+            panel.addEventListener('click', function (e) {
+                if (e.target.closest('a')) {
+                    panel.classList.remove('open');
+                    toggle.setAttribute('aria-expanded', 'false');
+                }
+            });
+        }
+    })();
+
     function updateWordCount(textarea) {
-        const words = textarea.value.trim() === '' ? 0 : textarea.value.trim().split(/\s+/).length;
-        const counter = document.getElementById('jd-word-count');
+        var words = textarea.value.trim() === '' ? 0 : textarea.value.trim().split(/\s+/).length;
+        var counter = document.getElementById('jd-word-count');
         counter.textContent = words.toLocaleString() + ' / 3,000 words';
-        counter.style.color = words > 3000 ? 'red' : 'var(--text-muted, #888)';
-        const submitBtn = textarea.closest('form').querySelector('[type="submit"]');
+        counter.classList.toggle('over', words > 3000);
+        var submitBtn = textarea.closest('form').querySelector('[type="submit"]');
         if (submitBtn) submitBtn.disabled = words > 3000;
     }
 
-    const fileInput = document.getElementById('resumeFile');
-    const fileSelected = document.getElementById('fileSelected');
-    const fileName = document.getElementById('fileName');
-    const uploadZone = document.getElementById('uploadZone');
-
-    fileInput.addEventListener('change', () => {
-        if (fileInput.files.length > 0) {
-            fileName.textContent = fileInput.files[0].name;
-            fileSelected.style.display = 'block';
-            uploadZone.style.borderColor = '#22c55e';
-        }
-    });
-
-    const form = document.getElementById('tailorForm');
-    const overlay = document.getElementById('loadingOverlay');
-    const submitBtn = document.getElementById('submitBtn');
-
+    var form = document.getElementById('tailorForm');
     if (form) {
-        form.addEventListener('submit', () => {
+        var fileInput = document.getElementById('resumeFile');
+        var fileSelected = document.getElementById('fileSelected');
+        var fileName = document.getElementById('fileName');
+        var uploadZone = document.getElementById('uploadZone');
+        var overlay = document.getElementById('loadingOverlay');
+        var submitBtn = document.getElementById('submitBtn');
+
+        fileInput.addEventListener('change', function () {
+            if (fileInput.files.length > 0) {
+                fileName.textContent = fileInput.files[0].name;
+                fileSelected.style.display = 'block';
+                uploadZone.classList.add('has-file');
+            }
+        });
+
+        form.addEventListener('submit', function () {
             overlay.classList.add('active');
             submitBtn.disabled = true;
-
-            setTimeout(() => {
-                document.getElementById('step-ai').classList.add('active');
-            }, 1500);
-
-            setTimeout(() => {
-                document.getElementById('step-generate').classList.add('active');
-            }, 4000);
+            setTimeout(function () { document.getElementById('step-ai').classList.add('active'); }, 1500);
+            setTimeout(function () { document.getElementById('step-generate').classList.add('active'); }, 4000);
         });
     }
 </script>
 
 </body>
 </html>
+

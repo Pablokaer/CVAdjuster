@@ -31,3 +31,6 @@ logs/
 .claude
 skills-lock.json
 
+
+# Visual Studio cache
+.vs/
