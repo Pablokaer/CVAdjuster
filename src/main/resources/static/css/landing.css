@@ -403,6 +403,22 @@ textarea:focus { outline: none; border-color: var(--mint); box-shadow: 0 0 0 3px
     .how-grid, .price-grid { grid-template-columns: 1fr; }
 }
 
+/* Single-column layout (tablet / narrow windows): centre content on the page's vertical axis */
+@media (max-width: 1020px) {
+    .hero-copy { text-align: center; display: flex; flex-direction: column; align-items: center; }
+    .hero-lead { max-width: 52ch; margin-inline: auto; }
+    .cta-card { margin-inline: auto; }
+    .trust { justify-content: center; }
+    .section-inner, .section-title, .section-lead, .eyebrow { text-align: center; margin-inline: auto; }
+    .how-card, .price-card { text-align: center; }
+    .how-card .step-num { margin-inline: auto; display: grid; }
+    .price-flag { right: 50%; transform: translateX(50%); }
+    .faq summary { justify-content: center; text-align: center; }
+    .faq p { text-align: center; }
+    .site-footer-inner { flex-direction: column; text-align: center; gap: 18px; }
+    .site-footer nav { justify-content: center; flex-wrap: wrap; margin-left: 0; width: 100%; }
+}
+
 @media (max-width: 640px) {
     .brand-icon { height: 40px; } .brand-word { height: 17px; }
     .hero { padding: 24px 16px 24px; }
