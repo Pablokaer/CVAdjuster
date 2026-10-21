@@ -1,0 +1,40 @@
+name: Auto-merge pull requests
+
+# Turns on auto-merge (merge commit) for every pull request opened from this repository, so GitHub merges it by
+# itself once the checks the branch protection requires pass. Skipped for drafts, forks and pull requests
+# labelled `no-auto-merge` (add the label to opt out; removing it opts back in).
+#
+# Uses the AUTO_MERGE_TOKEN secret (a personal access token), never GITHUB_TOKEN: a merge made with GITHUB_TOKEN
+# doesn't trigger other workflows, so the push to the default branch wouldn't run its CI or deploy. Until the
+# secret exists this workflow only warns, and the pull request is merged by hand.
+# Repository setting: Settings -> General -> "Allow auto-merge" must be on.
+
+on:
+  pull_request:
+    types: [opened, reopened, ready_for_review, labeled, unlabeled]
+
+permissions:
+  contents: read
+
+jobs:
+  enable:
+    name: Enable auto-merge
+    if: github.event.pull_request.head.repo.full_name == github.repository && !github.event.pull_request.draft
+    runs-on: ubuntu-latest
+    steps:
+      - name: Enable auto-merge
+        env:
+          GH_TOKEN: ${{ secrets.AUTO_MERGE_TOKEN }}
+          PR: ${{ github.event.pull_request.html_url }}
+          OPT_OUT: ${{ contains(github.event.pull_request.labels.*.name, 'no-auto-merge') }}
+        run: |
+          if [ -z "$GH_TOKEN" ]; then
+            echo "::warning::Secret AUTO_MERGE_TOKEN is not set: auto-merge was not enabled; merge this pull request by hand."
+            exit 0
+          fi
+          if [ "$OPT_OUT" = "true" ]; then
+            gh pr merge --disable-auto "$PR" || true
+            echo "Labelled no-auto-merge: auto-merge is off for this pull request."
+            exit 0
+          fi
+          gh pr merge --auto --merge "$PR"
