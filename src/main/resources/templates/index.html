@@ -338,7 +338,7 @@
         <h2 class="section-title">Pay only for the resumes you generate</h2>
         <p class="section-lead">New accounts start with 1 free credit. Credits are one-time purchases, with no subscription.</p>
         <div class="price-grid">
-            <article class="price-card" th:each="plan : ${T(com.resumetailor.payment.entity.CreditPlan).values()}"
+            <article class="price-card" th:each="plan : ${plans}"
                      th:classappend="${plan.featured} ? 'featured' : ''">
                 <span class="price-flag" th:if="${plan.featured}">Most popular</span>
                 <h3 th:text="${plan.displayName}">Pro</h3>
