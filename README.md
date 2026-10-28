@@ -272,13 +272,14 @@ target/resume-tailor-0.0.1-SNAPSHOT.jar
 | `POST` | `/login` | Public | Form login (`email` and `password` fields, CSRF token required) |
 | `POST` | `/logout` | Required | Ends the session |
 | `GET` | `/credits` | Required | Credits and plans page |
-| `POST` | `/tailor` | Required | Processes a resume through the web form |
-| `POST` | `/api/tailor` | Required | Processes a resume through the API (same validation as the form; consumes 1 credit, refunded on failure) |
+| `POST` | `/tailor` | Required | Processes a resume through the web form (`includeCoverLetter=true` also writes a cover letter for 1 extra credit) |
+| `POST` | `/api/tailor` | Required | Processes a resume through the API (same validation as the form; consumes 1 credit, +1 with `includeCoverLetter=true`; refunded on failure) |
 | `GET` | `/download/{filename}` | Required | Downloads a generated file |
 | `GET` | `/open-in-gdocs/{filename}` | Required | Opens DOCX in Google Docs |
 | `GET` | `/history` | Required | Generated resume history |
 | `GET` | `/history/{id}/text` | Required | Text for one history entry |
 | `GET` | `/history/{id}/download/{format}` | Required | Downloads a history entry as `pdf` or `docx` |
+| `GET` | `/history/{id}/cover-letter/download/{format}` | Required | Downloads the entry's cover letter as `pdf` or `docx` (404 if it has none) |
 | `POST` | `/api/payment/checkout` | Required | Creates a Stripe Checkout session |
 | `GET` | `/api/payment/orders/{id}` | Required | Gets order status |
 | `POST` | `/api/webhook/stripe` | Stripe signature | Receives Stripe events (CSRF disabled for this route) |

@@ -39,8 +39,8 @@
                 </a>
 
                 <img class="user-avatar"
-                     th:if="${#authentication.principal instanceof T(org.springframework.security.oauth2.core.user.OAuth2User)}"
-                     th:src="${#authentication.principal.attributes['picture']}"
+                     th:if="${userPicture != null}"
+                     th:src="${userPicture}"
                      onerror="this.style.display='none'"/>
 
                 <span class="user-name" th:text="${#authentication.name}"></span>

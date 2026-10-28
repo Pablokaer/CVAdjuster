@@ -71,6 +71,50 @@ public class HistoryController {
             .orElse(ResponseEntity.notFound().build());
     }
 
+    @GetMapping("/history/{id}/cover-letter/download/{format}")
+    public ResponseEntity<byte[]> downloadCoverLetter(
+        @PathVariable Long id,
+        @PathVariable String format,
+        Authentication authentication) {
+
+        String normalizedFormat = format == null ? "" : format.toLowerCase();
+        if (!normalizedFormat.equals("pdf") && !normalizedFormat.equals("docx")) {
+            return ResponseEntity.badRequest().build();
+        }
+
+        String email = UserService.extractEmail(authentication);
+        return historyRepository.findById(id)
+            .filter(e -> e.getUser().getEmail().equals(email))
+            .filter(e -> e.getCoverLetterText() != null)
+            .map(e -> buildCoverLetterDownload(e, normalizedFormat))
+            .orElse(ResponseEntity.notFound().build());
+    }
+
+    private ResponseEntity<byte[]> buildCoverLetterDownload(ResumeHistory entry, String format) {
+        try {
+            byte[] fileBytes;
+            String contentType;
+
+            if (format.equals("docx")) {
+                fileBytes = docxGeneratorService.generateLetterDocx(entry.getCoverLetterText());
+                contentType = "application/vnd.openxmlformats-officedocument.wordprocessingml.document";
+            } else {
+                fileBytes = pdfGeneratorService.generateLetterPdf(entry.getCoverLetterText());
+                contentType = "application/pdf";
+            }
+
+            String filename = "cover-letter-history-" + entry.getId() + "." + format;
+
+            return ResponseEntity.ok()
+                .header(HttpHeaders.CONTENT_DISPOSITION, "attachment; filename=\"" + filename + "\"")
+                .contentType(MediaType.parseMediaType(contentType))
+                .body(fileBytes);
+        } catch (IOException e) {
+            log.error("Could not generate cover letter download for entry {} as {}", entry.getId(), format, e);
+            return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).build();
+        }
+    }
+
     private ResponseEntity<byte[]> buildHistoryDownload(ResumeHistory entry, String format) {
         try {
             byte[] fileBytes;

@@ -40,8 +40,8 @@
                 </a>
 
                 <img class="user-avatar"
-                     th:if="${#authentication.principal instanceof T(org.springframework.security.oauth2.core.user.OAuth2User)}"
-                     th:src="${#authentication.principal.attributes['picture']}"
+                     th:if="${userPicture != null}"
+                     th:src="${userPicture}"
                      onerror="this.style.display='none'"/>
 
                 <span class="user-name" th:text="${#authentication.name}"></span>
@@ -120,6 +120,22 @@
                     <svg xmlns="http://www.w3.org/2000/svg" width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/><polyline points="7 10 12 15 17 10"/><line x1="12" y1="15" x2="12" y2="3"/></svg>
                     DOCX
                 </a>
+
+                <th:block th:if="${entry.coverLetterText != null}">
+                    <a th:href="@{/history/{id}/cover-letter/download/pdf(id=${entry.id})}"
+                       class="hcard-btn letter"
+                       download>
+                        <svg xmlns="http://www.w3.org/2000/svg" width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M4 4h16c1.1 0 2 .9 2 2v12c0 1.1-.9 2-2 2H4c-1.1 0-2-.9-2-2V6c0-1.1.9-2 2-2z"/><polyline points="22,6 12,13 2,6"/></svg>
+                        Letter PDF
+                    </a>
+
+                    <a th:href="@{/history/{id}/cover-letter/download/docx(id=${entry.id})}"
+                       class="hcard-btn letter"
+                       download>
+                        <svg xmlns="http://www.w3.org/2000/svg" width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M4 4h16c1.1 0 2 .9 2 2v12c0 1.1-.9 2-2 2H4c-1.1 0-2-.9-2-2V6c0-1.1.9-2 2-2z"/><polyline points="22,6 12,13 2,6"/></svg>
+                        Letter DOCX
+                    </a>
+                </th:block>
 
                 <span class="hcard-spacer"></span>
 

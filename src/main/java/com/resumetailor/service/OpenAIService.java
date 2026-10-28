@@ -67,18 +67,41 @@ public class OpenAIService {
     public TailoredResult tailorResume(String resumeText, String jobDescription) {
         log.info("Sending resume to OpenAI API (model: {})...", model);
 
+        String rawJson = complete(buildSystemPrompt(), buildUserPrompt(resumeText, jobDescription),
+                new ResponseFormat("json_object"));
+        return parseResult(rawJson);
+    }
+
+    /**
+     * Writes a cover letter for the job, based only on the (already tailored) resume.
+     *
+     * @return the letter as plain text, paragraphs separated by blank lines
+     */
+    public String generateCoverLetter(String resumeText, String jobDescription) {
+        log.info("Generating cover letter with OpenAI API (model: {})...", model);
+
+        String letter = complete(buildCoverLetterSystemPrompt(),
+                buildCoverLetterUserPrompt(resumeText, jobDescription), new ResponseFormat("text"));
+        if (letter == null || letter.isBlank()) {
+            throw new RuntimeException("Empty cover letter from OpenAI API.");
+        }
+        return letter.strip();
+    }
+
+    /** Sends one chat completion and returns the content of the first choice. */
+    private String complete(String systemPrompt, String userPrompt, ResponseFormat responseFormat) {
         OpenAIRequest request = OpenAIRequest.builder()
                 .model(model)
                 .maxTokens(maxTokens)
-                .responseFormat(new ResponseFormat("json_object"))
+                .responseFormat(responseFormat)
                 .messages(List.of(
                         Message.builder()
                                 .role("system")
-                                .content(buildSystemPrompt())
+                                .content(systemPrompt)
                                 .build(),
                         Message.builder()
                                 .role("user")
-                                .content(buildUserPrompt(resumeText, jobDescription))
+                                .content(userPrompt)
                                 .build()
                 ))
                 .build();
@@ -94,12 +117,10 @@ public class OpenAIService {
                 throw new RuntimeException("Empty response from OpenAI API.");
             }
 
-            String rawJson = response.getChoices().get(0).getMessage().getContent();
-
-            log.info("Resume tailored successfully. Tokens used: {}",
+            log.info("OpenAI completion succeeded. Tokens used: {}",
                     response.getUsage() != null ? response.getUsage().getTotalTokens() : "?");
 
-            return parseResult(rawJson);
+            return response.getChoices().get(0).getMessage().getContent();
 
         } catch (WebClientResponseException e) {
             log.error("OpenAI API error: {} — {}", e.getStatusCode(), e.getResponseBodyAsString());
@@ -197,6 +218,43 @@ public class OpenAIService {
                 - Skip trivial changes (punctuation fixes, minor rephrasing)
                 - Focus on keyword additions, skill reordering, and summary rewrites
                 """;
+    }
+
+    private String buildCoverLetterSystemPrompt() {
+        return """
+                You are an expert career coach who writes concise, specific cover letters.
+                Write a cover letter for the candidate described in the resume, applying to the job posting.
+
+                Return ONLY the letter as plain text: no JSON, no markdown, no headings, no commentary.
+                Separate paragraphs with a single blank line.
+
+                RULES:
+                1. Use only facts from the resume. Do NOT invent experiences, employers, metrics, \
+                certifications or skills
+                2. Never output placeholders such as [Company Name], [Date] or [Your Address]. \
+                If a detail (company name, hiring manager, address) is not given, leave it out
+                3. Open with "Dear Hiring Manager," unless the job posting names the person to address
+                4. 250 to 400 words, in 3 to 5 paragraphs
+                5. First paragraph: the exact job title from the posting and a one-sentence value proposition
+                6. Middle paragraphs: two or three concrete achievements from the resume that match the most \
+                important requirements of the posting, using the posting's terminology where the resume supports it
+                7. Closing paragraph: brief interest in an interview and thanks
+                8. End with "Sincerely," followed by the candidate's name as written in the resume
+                9. Write in the same language as the job posting
+                10. Confident, professional tone; avoid clichés such as "I am writing to express my interest"
+                """;
+    }
+
+    private String buildCoverLetterUserPrompt(String resumeText, String jobDescription) {
+        return """
+                --- RESUME ---
+                %s
+
+                --- JOB DESCRIPTION ---
+                %s
+
+                Write the cover letter now.
+                """.formatted(resumeText, jobDescription);
     }
 
     private String buildUserPrompt(String resumeText, String jobDescription) {

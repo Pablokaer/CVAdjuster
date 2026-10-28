@@ -1,11 +1,15 @@
 package com.resumetailor.dto;
 
 import java.util.List;
+import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Data;
+import lombok.NoArgsConstructor;
 
 @Data
 @Builder
+@NoArgsConstructor
+@AllArgsConstructor
 public class TailorResponse {
 
     private boolean success;
@@ -17,36 +21,14 @@ public class TailorResponse {
     private List<ChangeHighlight> changes;
     private List<KeywordMatch> keywords;
 
-    public TailorResponse() {}
+    /** Present only when a cover letter was requested and generated. */
+    private String coverLetterText;
+    private String coverLetterPdfUrl;
+    private String coverLetterDocxUrl;
 
-    public TailorResponse(boolean success, String message, String tailoredResumeText,
-        String downloadUrl, String docxDownloadUrl,
-        String format, List<ChangeHighlight> changes, List<KeywordMatch> keywords) {
-        this.success = success;
-        this.message = message;
-        this.tailoredResumeText = tailoredResumeText;
-        this.downloadUrl = downloadUrl;
-        this.docxDownloadUrl = docxDownloadUrl;
-        this.format = format;
-        this.changes = changes;
-        this.keywords = keywords;
-    }
-
-    public boolean isSuccess() { return success; }
-    public String getMessage() { return message; }
-    public String getTailoredResumeText() { return tailoredResumeText; }
-    public String getDownloadUrl() { return downloadUrl; }
-    public String getDocxDownloadUrl() { return docxDownloadUrl; }
-    public String getFormat() { return format; }
-    public List<ChangeHighlight> getChanges() { return changes; }
-    public List<KeywordMatch> getKeywords() { return keywords; }
-
-    public void setSuccess(boolean success) { this.success = success; }
-    public void setMessage(String message) { this.message = message; }
-    public void setTailoredResumeText(String tailoredResumeText) { this.tailoredResumeText = tailoredResumeText; }
-    public void setDownloadUrl(String downloadUrl) { this.downloadUrl = downloadUrl; }
-    public void setDocxDownloadUrl(String docxDownloadUrl) { this.docxDownloadUrl = docxDownloadUrl; }
-    public void setFormat(String format) { this.format = format; }
-    public void setChanges(List<ChangeHighlight> changes) { this.changes = changes; }
-    public void setKeywords(List<KeywordMatch> keywords) { this.keywords = keywords; }
+    /**
+     * True when a cover letter was requested but could not be generated. The resume
+     * itself still succeeded, so only the cover letter's credit is refunded.
+     */
+    private boolean coverLetterFailed;
 }

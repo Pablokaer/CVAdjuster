@@ -46,8 +46,8 @@
                 </a>
 
                 <img class="user-avatar"
-                     th:if="${#authentication.principal instanceof T(org.springframework.security.oauth2.core.user.OAuth2User)}"
-                     th:src="${#authentication.principal.attributes['picture']}"
+                     th:if="${userPicture != null}"
+                     th:src="${userPicture}"
                      onerror="this.style.display='none'"/>
 
                 <span class="user-name" th:text="${#authentication.name}"></span>
@@ -215,6 +215,29 @@
             </div>
         </div>
 
+        <div class="alert alert-warning" role="status" th:if="${coverLetterFailed}">
+            <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><circle cx="12" cy="12" r="10"/><line x1="12" y1="8" x2="12" y2="12"/><line x1="12" y1="16" x2="12.01" y2="16"/></svg>
+            <span>We couldn't write your cover letter this time, so its credit was refunded. Your tailored resume is ready above.</span>
+        </div>
+
+        <div class="panel cover-letter-panel" th:if="${coverLetterText != null}">
+            <div class="panel-header">
+                <span class="panel-title">✦ Cover letter</span>
+                <div class="panel-actions">
+                    <a th:href="${coverLetterPdfUrl}" class="copy-btn" download>PDF</a>
+                    <a th:href="${coverLetterDocxUrl}" class="copy-btn" download>DOCX</a>
+                    <button class="copy-btn" id="copyLetterBtn" onclick="copyFrom('coverLetterText', this)">Copy</button>
+                </div>
+            </div>
+
+            <div class="panel-body">
+                <pre id="coverLetterText"
+                     class="resume-text letter-text"
+                     th:text="${coverLetterText}">
+                </pre>
+            </div>
+        </div>
+
         <a href="/" class="new-btn">← New resume</a>
 
     </div>
@@ -241,10 +264,13 @@
     }
 
     function copyText() {
-        const text = document.getElementById('resumeText').textContent;
+        copyFrom('resumeText', document.getElementById('copyBtn'));
+    }
+
+    function copyFrom(elementId, btn) {
+        const text = document.getElementById(elementId).textContent;
 
         navigator.clipboard.writeText(text).then(() => {
-            const btn = document.getElementById('copyBtn');
             btn.textContent = '✓ Copied';
 
             setTimeout(() => {

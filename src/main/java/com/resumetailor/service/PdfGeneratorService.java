@@ -114,6 +114,38 @@ public class PdfGeneratorService {
         return outputStream.toByteArray();
     }
 
+    /**
+     * Gera um PDF de carta (cover letter): parágrafos alinhados à esquerda,
+     * sem a formatação de currículo (nome centralizado, cabeçalhos de seção).
+     *
+     * @param letterText Texto da carta, parágrafos separados por linha em branco
+     * @return Bytes do arquivo PDF gerado
+     */
+    public byte[] generateLetterPdf(String letterText) throws IOException {
+        log.info("Gerando PDF da cover letter...");
+
+        ByteArrayOutputStream outputStream = new ByteArrayOutputStream();
+        PdfDocument pdfDoc = new PdfDocument(new PdfWriter(outputStream));
+        Document document = new Document(pdfDoc, PageSize.A4);
+        document.setMargins(60, 60, 60, 60);
+
+        PdfFont regularFont = PdfFontFactory.createFont(StandardFonts.HELVETICA);
+
+        for (String block : letterText.strip().split("\\n\\s*\\n")) {
+            document.add(new Paragraph(block.strip())
+                    .setFont(regularFont)
+                    .setFontSize(11)
+                    .setFontColor(ColorConstants.BLACK)
+                    .setMultipliedLeading(1.3f)
+                    .setMarginBottom(10)
+                    .setTextAlignment(TextAlignment.LEFT));
+        }
+
+        document.close();
+        log.info("PDF da cover letter gerado com sucesso. {} bytes.", outputStream.size());
+        return outputStream.toByteArray();
+    }
+
     private boolean isSectionHeader(String line) {
         if (line.startsWith("---") || line.endsWith("---")) return true;
         if (line.length() < 3) return false;

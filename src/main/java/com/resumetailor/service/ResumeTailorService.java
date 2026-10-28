@@ -42,6 +42,16 @@ public class ResumeTailorService {
      * @return TailorResponse with download URLs
      */
     public TailorResponse tailorResume(MultipartFile resumeFile, String jobDescription, String outputFormat) {
+        return tailorResume(resumeFile, jobDescription, outputFormat, false);
+    }
+
+    /**
+     * Same flow, optionally followed by a cover letter written from the tailored resume.
+     * A failed cover letter does not fail the request: the resume is still returned and
+     * {@link TailorResponse#isCoverLetterFailed()} tells the caller to refund its credit.
+     */
+    public TailorResponse tailorResume(MultipartFile resumeFile, String jobDescription,
+                                       String outputFormat, boolean includeCoverLetter) {
         try {
             // 1. Extract text from uploaded resume (PDF or DOCX)
             log.info("Step 1: Extracting text from resume...");
@@ -75,7 +85,7 @@ public class ResumeTailorService {
             String primaryUrl = saveGeneratedFiles(tailored.tailoredText(), fileId, outputFormat);
             String docxUrl    = buildDocxUrl(primaryUrl);
 
-            return TailorResponse.builder()
+            TailorResponse response = TailorResponse.builder()
                     .success(true)
                     .message("Resume tailored successfully!")
                     .tailoredResumeText(tailored.tailoredText())
@@ -85,6 +95,12 @@ public class ResumeTailorService {
                     .changes(tailored.changes())
                     .keywords(tailored.keywords())
                     .build();
+
+            // 4. Optional cover letter, written from the tailored resume
+            if (includeCoverLetter) {
+                addCoverLetter(response, tailored.tailoredText(), jobDescription, fileId);
+            }
+            return response;
 
         } catch (IllegalArgumentException e) {
             log.warn("Validation error: {}", e.getMessage());
@@ -99,6 +115,28 @@ public class ResumeTailorService {
                     .success(false)
                     .message("An internal error occurred while processing your resume. Please try again.")
                     .build();
+        }
+    }
+
+    private void addCoverLetter(TailorResponse response, String tailoredResume,
+                                String jobDescription, String fileId) {
+        try {
+            log.info("Step 4: Generating cover letter...");
+            String letter = openAIService.generateCoverLetter(tailoredResume, jobDescription);
+
+            Path dir = Paths.get(tempDir);
+            String pdfFilename  = "resume-tailored-" + fileId + "-cover-letter.pdf";
+            String docxFilename = "resume-tailored-" + fileId + "-cover-letter.docx";
+            Files.write(dir.resolve(pdfFilename),  pdfGeneratorService.generateLetterPdf(letter));
+            Files.write(dir.resolve(docxFilename), docxGeneratorService.generateLetterDocx(letter));
+            log.info("Generated: {} and {}", pdfFilename, docxFilename);
+
+            response.setCoverLetterText(letter);
+            response.setCoverLetterPdfUrl("/download/" + pdfFilename);
+            response.setCoverLetterDocxUrl("/download/" + docxFilename);
+        } catch (Exception e) {
+            log.error("Cover letter generation failed; returning the resume without it", e);
+            response.setCoverLetterFailed(true);
         }
     }
 
@@ -167,7 +205,7 @@ public class ResumeTailorService {
 
     private boolean isGeneratedResumeFile(Path path) {
         String filename = path.getFileName().toString();
-        return filename.matches("resume-tailored-[a-fA-F0-9-]+\\.(pdf|docx)");
+        return filename.matches("resume-tailored-[a-fA-F0-9-]+(-cover-letter)?\\.(pdf|docx)");
     }
 
     private boolean isOlderThan(Path path, Instant cutoff) {

@@ -56,6 +56,42 @@ public class DocxGeneratorService {
         }
     }
 
+    /**
+     * Gera um DOCX de carta (cover letter): parágrafos alinhados à esquerda,
+     * sem a formatação de currículo (nome centralizado, cabeçalhos de seção).
+     *
+     * @param letterText Texto da carta, parágrafos separados por linha em branco
+     * @return Bytes do arquivo DOCX gerado
+     */
+    public byte[] generateLetterDocx(String letterText) throws IOException {
+        log.info("Gerando DOCX da cover letter...");
+
+        try (XWPFDocument document = new XWPFDocument();
+             ByteArrayOutputStream outputStream = new ByteArrayOutputStream()) {
+
+            for (String block : letterText.strip().split("\\n\\s*\\n")) {
+                XWPFParagraph paragraph = document.createParagraph();
+                paragraph.setAlignment(ParagraphAlignment.LEFT);
+                paragraph.setSpacingAfter(200);
+
+                XWPFRun run = paragraph.createRun();
+                run.setFontSize(11);
+                run.setFontFamily("Calibri");
+
+                // Linhas dentro do mesmo bloco (ex.: "Sincerely," + nome) viram quebras de linha
+                String[] lines = block.strip().split("\\n");
+                for (int i = 0; i < lines.length; i++) {
+                    if (i > 0) run.addBreak();
+                    run.setText(lines[i].strip(), i);
+                }
+            }
+
+            document.write(outputStream);
+            log.info("DOCX da cover letter gerado com sucesso. {} bytes.", outputStream.size());
+            return outputStream.toByteArray();
+        }
+    }
+
     private void addNameParagraph(XWPFDocument doc, String text) {
         XWPFParagraph paragraph = doc.createParagraph();
         paragraph.setAlignment(ParagraphAlignment.CENTER);
