@@ -1,11 +1,10 @@
 package com.resumetailor.payment.service;
 
-import com.fasterxml.jackson.databind.JsonNode;
-import com.fasterxml.jackson.databind.ObjectMapper;
 import com.resumetailor.model.User;
 import com.resumetailor.payment.config.StripeConfig;
 import com.resumetailor.payment.dto.PaymentRequestDTO;
 import com.resumetailor.payment.dto.PaymentResponseDTO;
+import com.resumetailor.payment.dto.SessionFacts;
 import com.resumetailor.payment.entity.CreditPlan;
 import com.resumetailor.payment.entity.Order;
 import com.resumetailor.payment.entity.OrderStatus;
@@ -14,6 +13,7 @@ import com.resumetailor.payment.exception.PaymentException;
 import com.resumetailor.event.CreditsPurchasedEvent;
 import com.resumetailor.payment.repository.OrderRepository;
 import com.resumetailor.payment.repository.StripeProcessedEventRepository;
+import com.resumetailor.repository.UserRepository;
 import com.resumetailor.service.UserService;
 import com.stripe.exception.SignatureVerificationException;
 import com.stripe.exception.StripeException;
@@ -29,6 +29,7 @@ import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
 import java.time.Instant;
+import java.util.Optional;
 
 @Slf4j
 @Service
@@ -39,9 +40,8 @@ public class PaymentService {
     private final StripeProcessedEventRepository processedEventRepository;
     private final StripeConfig stripeConfig;
     private final UserService userService;
+    private final UserRepository userRepository;
     private final ApplicationEventPublisher eventPublisher;
-
-    private static final ObjectMapper MAPPER = new ObjectMapper();
 
     // ── checkout session creation ─────────────────────────────────────────────
 
@@ -50,9 +50,9 @@ public class PaymentService {
      *
      * Metadata strategy:
      *  - order_id  → primary key for webhook-to-order resolution (fast, reliable)
-     *  - user_id   → used as fallback if the order lookup fails in the webhook
-     *  - credits   → used as fallback if the order lookup fails in the webhook
-     *  - plan_id   → human-readable context in the Stripe dashboard
+     *  - user_id   → used to rebuild the order if the order lookup fails in the webhook
+     *  - credits   → cross-checked against the plan during that recovery
+     *  - plan_id   → resolves the plan during recovery; also context in the Stripe dashboard
      *
      * The idempotency key "order-{id}" ensures that if the client retries this
      * request (double-click, network error), Stripe returns the existing session
@@ -166,15 +166,14 @@ public class PaymentService {
         }
 
         switch (event.getType()) {
-            // Synchronous card payments — fires immediately on payment confirmation.
-            case "checkout.session.completed" -> handleSessionCompleted(event);
+            // completed fires at the end of checkout. For delayed payment methods (SEPA,
+            // bank transfers) the session may still be unpaid at that point; the money
+            // arrives later with async_payment_succeeded. fulfil() checks payment_status,
+            // so both events share one handler.
+            case "checkout.session.completed",
+                 "checkout.session.async_payment_succeeded" -> handleSessionPaid(event);
 
-            // Asynchronous payment methods (SEPA, BACS, ACH) — fires when the bank
-            // confirms the transfer, which can be days after checkout.session.completed.
-            // Both events are safe to handle with the same logic because creditFromOrder
-            // checks order status before acting.
-            case "checkout.session.async_payment_succeeded" -> handleSessionCompleted(event);
-
+            case "checkout.session.async_payment_failed" -> handleSessionFailed(event);
             case "checkout.session.expired" -> handleSessionExpired(event);
             default -> log.debug("Unhandled Stripe event: type={}", event.getType());
         }
@@ -193,100 +192,40 @@ public class PaymentService {
         log.info("Stripe event {} recorded as processed", event.getId());
     }
 
-    private void handleSessionCompleted(Event event) {
-        String sessionId = extractSessionId(event);
-        log.info("Processing checkout.session.completed for session {}", sessionId);
 
-        orderRepository.findByStripeSessionId(sessionId).ifPresentOrElse(
-                order -> creditFromOrder(order),
-                // Fallback: order not found (e.g. stripeSessionId was never saved due to a DB
-                // failure between Session.create() and orderRepository.save()). Use the metadata
-                // that was embedded in the session at creation time to recover.
-                () -> {
-                    log.warn("No order found for session {} — attempting metadata recovery", sessionId);
-                    creditFromMetadata(event, sessionId);
-                }
-        );
-    }
+    private void handleSessionPaid(Event event) {
+        SessionFacts facts = SessionFacts.fromEvent(event);
+        log.info("Processing {} for session {} (payment_status={})",
+                event.getType(), facts.sessionId(), facts.paymentStatus());
 
-    private void creditFromOrder(Order order) {
-        // Idempotency guard — Stripe may deliver the same event more than once.
-        // If this order was already processed, return immediately without touching
-        // the user's credit balance. This makes the entire handler safe to retry.
-        if (order.getStatus() == OrderStatus.PAID) {
-            log.info("Order {} already PAID — duplicate event ignored", order.getId());
-            return;
-        }
-
-        order.setStatus(OrderStatus.PAID);
-        orderRepository.save(order);
-        log.info("Order {} marked as PAID", order.getId());
-
-        if (order.getUserId() != null
-                && order.getCreditsToAdd() != null
-                && order.getCreditsToAdd() > 0) {
-            int credits = order.getCreditsToAdd();
-            userService.addCredits(order.getUserId(), credits).ifPresent(user -> {
-                log.info("Credited {} credits to userId={} (new balance: {})",
-                        credits, user.getId(), user.getCredits());
-                // Published inside the outer @Transactional — the AFTER_COMMIT listener
-                // sends the confirmation email only when the entire transaction commits,
-                // so the user never receives a confirmation for credits that were rolled back.
-                eventPublisher.publishEvent(new CreditsPurchasedEvent(user, credits));
-            });
+        Optional<Order> order = orderRepository.findByStripeSessionIdForUpdate(facts.sessionId());
+        if (order.isPresent()) {
+            fulfil(order.get(), facts);
         } else {
-            log.warn("Order {} has no userId or creditsToAdd — skipping credit grant", order.getId());
+            // Order not found (e.g. stripeSessionId was never saved due to a DB failure
+            // between Session.create() and orderRepository.save()). Rebuild it from the
+            // metadata embedded in the session at creation time.
+            log.warn("No order found for session {} — attempting metadata recovery", facts.sessionId());
+            recoverOrderFromMetadata(facts);
         }
     }
 
-    /**
-     * Last-resort recovery using the metadata embedded in the Stripe session.
-     * Called only when the local order record cannot be found.
-     * Uses only data we put there ourselves — never trusts arbitrary metadata values
-     * without parsing and bounds-checking them.
-     */
-    private void creditFromMetadata(Event event, String sessionId) {
-        try {
-            JsonNode data     = MAPPER.readTree(event.getDataObjectDeserializer().getRawJson());
-            JsonNode metadata = data.path("metadata");
+    private void handleSessionFailed(Event event) {
+        String sessionId = SessionFacts.fromEvent(event).sessionId();
 
-            if (metadata.isMissingNode() || metadata.isNull()) {
-                log.error("No metadata in session {} — cannot recover credits", sessionId);
-                return;
+        orderRepository.findByStripeSessionIdForUpdate(sessionId).ifPresent(order -> {
+            if (order.getStatus() == OrderStatus.PENDING) {
+                order.setStatus(OrderStatus.FAILED);
+                orderRepository.save(order);
+                log.info("Order {} marked as FAILED (async payment failed)", order.getId());
             }
-
-            String userIdStr  = metadata.path("user_id").asText(null);
-            String creditsStr = metadata.path("credits").asText(null);
-
-            if (userIdStr == null || creditsStr == null) {
-                log.error("Incomplete metadata in session {} (user_id={}, credits={}) — cannot recover",
-                        sessionId, userIdStr, creditsStr);
-                return;
-            }
-
-            long userId  = Long.parseLong(userIdStr);
-            int  credits = Integer.parseInt(creditsStr);
-
-            if (credits <= 0) {
-                log.error("Invalid credits value {} in metadata for session {} — aborting", credits, sessionId);
-                return;
-            }
-
-            userService.addCredits(userId, credits);
-            log.warn("RECOVERY: granted {} credits to userId={} via metadata (session={})",
-                    credits, userId, sessionId);
-
-        } catch (NumberFormatException e) {
-            log.error("Malformed numeric metadata in session {}: {}", sessionId, e.getMessage());
-        } catch (Exception e) {
-            log.error("Metadata recovery failed for session {}: {}", sessionId, e.getMessage());
-        }
+        });
     }
 
     private void handleSessionExpired(Event event) {
-        String sessionId = extractSessionId(event);
+        String sessionId = SessionFacts.fromEvent(event).sessionId();
 
-        orderRepository.findByStripeSessionId(sessionId).ifPresent(order -> {
+        orderRepository.findByStripeSessionIdForUpdate(sessionId).ifPresent(order -> {
             if (order.getStatus() == OrderStatus.PENDING) {
                 order.setStatus(OrderStatus.CANCELED);
                 orderRepository.save(order);
@@ -295,12 +234,128 @@ public class PaymentService {
         });
     }
 
+    /**
+     * Last-resort recovery when no local order matches the session. Never credits
+     * straight from metadata: the values must describe a real plan and match what
+     * Stripe actually charged. A new PENDING order is then saved and fulfilled
+     * through the same path as every other order.
+     *
+     * saveAndFlush() makes a concurrent duplicate hit the UNIQUE constraint on
+     * stripe_session_id; that transaction rolls back and Stripe retries, by which
+     * time the order exists and the normal path sees it as already PAID.
+     */
+    private void recoverOrderFromMetadata(SessionFacts facts) {
+        String sessionId = facts.sessionId();
+
+        if (!facts.isPaid()) {
+            log.warn("RECOVERY: session {} is not paid (payment_status={}) — nothing to recover",
+                    sessionId, facts.paymentStatus());
+            return;
+        }
+
+        CreditPlan plan;
+        long userId;
+        int credits;
+        try {
+            plan    = CreditPlan.fromId(facts.metadata().get("plan_id"));
+            userId  = Long.parseLong(facts.metadata().get("user_id"));
+            credits = Integer.parseInt(facts.metadata().get("credits"));
+        } catch (PaymentException | NumberFormatException e) {
+            log.error("RECOVERY: invalid metadata in session {} ({}) — cannot recover: {}",
+                    sessionId, facts.metadata(), e.getMessage());
+            return;
+        }
+
+        if (credits != plan.getCreditsToAdd()
+                || facts.amountTotal() == null
+                || facts.amountTotal() != plan.getAmount()
+                || !plan.getCurrency().equalsIgnoreCase(facts.currency())) {
+            log.error("SECURITY: session {} does not match plan {} (credits={}, amount={} {}; "
+                            + "expected credits={}, amount={} {}) — not crediting",
+                    sessionId, plan, credits, facts.amountTotal(), facts.currency(),
+                    plan.getCreditsToAdd(), plan.getAmount(), plan.getCurrency());
+            return;
+        }
+
+        Order order = orderRepository.saveAndFlush(Order.builder()
+                .productName(plan.getProductName())
+                .amount(plan.getAmount())
+                .currency(plan.getCurrency())
+                .status(OrderStatus.PENDING)
+                .userId(userId)
+                .creditsToAdd(plan.getCreditsToAdd())
+                .stripeSessionId(sessionId)
+                .build());
+        log.warn("RECOVERY: rebuilt order {} for session {} from metadata (userId={})",
+                order.getId(), sessionId, userId);
+
+        fulfil(order, facts);
+    }
+
+    // ── fulfilment ────────────────────────────────────────────────────────────
+
+    /**
+     * The single place where a purchase turns into credits; used by the webhook and
+     * the success-page reconciliation. The caller must hold the row lock on the order
+     * (findByStripeSessionIdForUpdate) or have just inserted it, so concurrent callers
+     * are serialized and only the first one sees PENDING.
+     *
+     * Credits are granted only when the order is PENDING, Stripe reports the session
+     * as paid, and the charged amount and currency match the order.
+     *
+     * @return true if the order is PAID after this call (just now or already before)
+     */
+    public boolean fulfil(Order lockedOrder, SessionFacts facts) {
+        if (lockedOrder.getStatus() == OrderStatus.PAID) {
+            log.info("Order {} already PAID — nothing to do", lockedOrder.getId());
+            return true;
+        }
+        if (lockedOrder.getStatus() != OrderStatus.PENDING) {
+            log.warn("Order {} is {} — not crediting session {}",
+                    lockedOrder.getId(), lockedOrder.getStatus(), facts.sessionId());
+            return false;
+        }
+        if (!facts.isPaid()) {
+            log.info("Session {} payment_status={} — order {} stays PENDING until payment arrives",
+                    facts.sessionId(), facts.paymentStatus(), lockedOrder.getId());
+            return false;
+        }
+        if (!lockedOrder.getAmount().equals(facts.amountTotal())
+                || !lockedOrder.getCurrency().equalsIgnoreCase(facts.currency())) {
+            log.error("SECURITY: session {} charged {} {} but order {} expects {} {} — not crediting",
+                    facts.sessionId(), facts.amountTotal(), facts.currency(),
+                    lockedOrder.getId(), lockedOrder.getAmount(), lockedOrder.getCurrency());
+            return false;
+        }
+
+        lockedOrder.setStatus(OrderStatus.PAID);
+        orderRepository.save(lockedOrder);
+        log.info("Order {} marked as PAID", lockedOrder.getId());
+
+        if (lockedOrder.getUserId() != null
+                && lockedOrder.getCreditsToAdd() != null
+                && lockedOrder.getCreditsToAdd() > 0) {
+            int credits = lockedOrder.getCreditsToAdd();
+            userService.addCredits(lockedOrder.getUserId(), credits).ifPresent(user -> {
+                log.info("Credited {} credits to userId={} (new balance: {})",
+                        credits, user.getId(), user.getCredits());
+                // Published inside the outer @Transactional — the AFTER_COMMIT listener
+                // sends the confirmation email only when the entire transaction commits,
+                // so the user never receives a confirmation for credits that were rolled back.
+                eventPublisher.publishEvent(new CreditsPurchasedEvent(user, credits));
+            });
+        } else {
+            log.warn("Order {} has no userId or creditsToAdd — skipping credit grant", lockedOrder.getId());
+        }
+        return true;
+    }
+
     // ── success-page reconciliation ───────────────────────────────────────────
 
     /**
      * Called when the user returns to the success URL.
-     * Verifies the session directly with the Stripe API and grants credits if the
-     * order is still PENDING — handles the case where the webhook has not arrived yet
+     * Verifies the session directly with the Stripe API and fulfils the order if it
+     * is still PENDING — handles the case where the webhook has not arrived yet
      * (local dev, Stripe delivery delay, or misconfigured endpoint URL).
      *
      * Credits must never be granted based on the redirect URL alone — this always
@@ -308,7 +363,7 @@ public class PaymentService {
      */
     @Transactional
     public boolean reconcileSuccessfulSession(String sessionId) {
-        Order order = orderRepository.findByStripeSessionId(sessionId).orElse(null);
+        Order order = orderRepository.findByStripeSessionIdForUpdate(sessionId).orElse(null);
         if (order == null) {
             log.warn("reconcile: no order found for session {}", sessionId);
             return false;
@@ -319,57 +374,27 @@ public class PaymentService {
             return true;
         }
 
+        Session session;
         try {
-            Session session = Session.retrieve(sessionId);
-            if (!"paid".equals(session.getPaymentStatus())) {
-                log.warn("reconcile: session {} paymentStatus={} — not crediting",
-                        sessionId, session.getPaymentStatus());
-                return false;
-            }
+            session = Session.retrieve(sessionId);
         } catch (StripeException e) {
             log.error("reconcile: failed to retrieve session {} from Stripe: {}", sessionId, e.getMessage());
             return false;
         }
-
-        order.setStatus(OrderStatus.PAID);
-        orderRepository.save(order);
-        log.info("reconcile: order {} marked PAID", order.getId());
-
-        if (order.getUserId() != null
-                && order.getCreditsToAdd() != null
-                && order.getCreditsToAdd() > 0) {
-            int credits = order.getCreditsToAdd();
-            userService.addCredits(order.getUserId(), credits).ifPresent(user -> {
-                log.info("reconcile: granted {} credits to userId={} for session {}",
-                        credits, user.getId(), sessionId);
-                eventPublisher.publishEvent(new CreditsPurchasedEvent(user, credits));
-            });
-        }
-        return true;
+        return fulfil(order, SessionFacts.fromSession(session));
     }
 
-    // ── helpers ───────────────────────────────────────────────────────────────
-
-    @Transactional(readOnly = true)
-    public Order getOrderById(Long orderId) {
-        return orderRepository.findById(orderId)
-                .orElseThrow(() -> new PaymentException("Order not found: " + orderId));
-    }
+    // ── order lookup ──────────────────────────────────────────────────────────
 
     /**
-     * Reads the Checkout Session ID from the raw webhook JSON.
-     *
-     * Using getRawJson() instead of getDataObjectDeserializer().getObject() avoids
-     * a silent Optional.empty() when the Stripe API version in the event payload does
-     * not match the version the SDK was compiled against — which would silently skip
-     * credit granting in handleSessionCompleted.
+     * Returns the order only if it belongs to the user with the given email.
+     * Unknown orders, unknown users and other users' orders are all empty, so a
+     * caller cannot tell someone else's order apart from a missing one.
      */
-    private String extractSessionId(Event event) {
-        try {
-            JsonNode data = MAPPER.readTree(event.getDataObjectDeserializer().getRawJson());
-            return data.get("id").asText();
-        } catch (Exception e) {
-            throw new PaymentException("Could not extract session ID from Stripe event: " + e.getMessage(), e);
-        }
+    @Transactional(readOnly = true)
+    public Optional<Order> findOrderForUser(Long orderId, String email) {
+        return userRepository.findByEmail(email)
+                .flatMap(user -> orderRepository.findById(orderId)
+                        .filter(order -> user.getId().equals(order.getUserId())));
     }
 }

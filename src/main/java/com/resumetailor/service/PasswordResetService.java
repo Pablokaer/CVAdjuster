@@ -59,8 +59,9 @@ public class PasswordResetService {
                 return;
             }
 
-            // Invalidate any previous token before creating a fresh one
-            tokenRepository.deleteByUser(user);
+            // Keep earlier links valid: users often request several emails and
+            // click an older one. Only used or expired tokens are removed.
+            tokenRepository.deleteDeadTokensForUser(user, Instant.now());
 
             String rawToken   = generateToken();
             String hashedToken = hashToken(rawToken);
@@ -104,9 +105,9 @@ public class PasswordResetService {
     // ── reset password ────────────────────────────────────────────────────────
 
     /**
-     * Validates the token, updates the password, and marks the token as used —
-     * all in a single atomic transaction. A rollback on any step leaves the
-     * token unconsumed and the password unchanged.
+     * Validates the token, updates the password, and revokes every outstanding
+     * token for the user — all in a single atomic transaction. A rollback on any
+     * step leaves the tokens intact and the password unchanged.
      */
     @Transactional
     public void resetPassword(String rawToken, String newPassword) {
@@ -116,9 +117,8 @@ public class PasswordResetService {
         user.setPassword(passwordEncoder.encode(newPassword));
         userRepository.save(user);
 
-        // Mark as used inside the same transaction — prevents replay within the window
-        prt.setUsed(true);
-        tokenRepository.save(prt);
+        // Revoke every outstanding link for this user, not just the one that was used
+        tokenRepository.deleteByUser(user);
         log.info("SECURITY: password reset completed, userId={}", user.getId());
     }
 
@@ -167,7 +167,8 @@ public class PasswordResetService {
      * cooldown window. Prevents inbox flooding and token-generation abuse.
      */
     private boolean isOnCooldown(User user) {
-        Optional<PasswordResetToken> existing = tokenRepository.findByUserAndUsedFalse(user);
+        Optional<PasswordResetToken> existing =
+                tokenRepository.findFirstByUserAndUsedFalseOrderByCreatedAtDesc(user);
         return existing
                 .map(t -> t.getCreatedAt().isAfter(Instant.now().minusSeconds(COOLDOWN_SECONDS)))
                 .orElse(false);
