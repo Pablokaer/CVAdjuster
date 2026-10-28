@@ -273,7 +273,7 @@ target/resume-tailor-0.0.1-SNAPSHOT.jar
 | `POST` | `/logout` | Required | Ends the session |
 | `GET` | `/credits` | Required | Credits and plans page |
 | `POST` | `/tailor` | Required | Processes a resume through the web form |
-| `POST` | `/api/tailor` | Required | Processes a resume through the API |
+| `POST` | `/api/tailor` | Required | Processes a resume through the API (same validation as the form; consumes 1 credit, refunded on failure) |
 | `GET` | `/download/{filename}` | Required | Downloads a generated file |
 | `GET` | `/open-in-gdocs/{filename}` | Required | Opens DOCX in Google Docs |
 | `GET` | `/history` | Required | Generated resume history |
