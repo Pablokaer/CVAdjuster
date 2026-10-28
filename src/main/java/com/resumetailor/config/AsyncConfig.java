@@ -30,4 +30,20 @@ public class AsyncConfig {
         executor.initialize();
         return executor;
     }
+
+    /**
+     * Bounded pool for parsing uploaded resumes. Keeps a flood of heavy or
+     * malicious files from exhausting request threads and memory; excess
+     * uploads are rejected instead of queued indefinitely.
+     */
+    @Bean(name = "extractionTaskExecutor")
+    public ThreadPoolTaskExecutor extractionTaskExecutor() {
+        ThreadPoolTaskExecutor executor = new ThreadPoolTaskExecutor();
+        executor.setCorePoolSize(2);
+        executor.setMaxPoolSize(4);
+        executor.setQueueCapacity(10);
+        executor.setThreadNamePrefix("extract-");
+        executor.initialize();
+        return executor;
+    }
 }
