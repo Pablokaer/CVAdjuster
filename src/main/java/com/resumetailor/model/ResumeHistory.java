@@ -36,4 +36,8 @@ public class ResumeHistory {
 
     private String pdfFilename;
     private String docxFilename;
+
+    /** Null when no cover letter was requested or it could not be generated. */
+    @Column(columnDefinition = "TEXT")
+    private String coverLetterText;
 }

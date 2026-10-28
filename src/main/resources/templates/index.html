@@ -190,6 +190,14 @@
                     <small id="jd-word-count">0 / 3,000 words</small>
                 </div>
 
+                <label class="checkbox-field" for="includeCoverLetter">
+                    <input type="checkbox" name="includeCoverLetter" id="includeCoverLetter" value="true">
+                    <span>
+                        Also write a cover letter
+                        <small>+1 credit · based on your tailored resume</small>
+                    </span>
+                </label>
+
                 <button type="submit" class="btn btn-mint btn-lg btn-block" id="submitBtn">✦ Tailor my resume</button>
             </form>
         </div>
@@ -325,7 +333,7 @@
             <article class="how-card">
                 <span class="step-num">3</span>
                 <h3>Download the result</h3>
-                <p>Get a rewritten resume with a summary of the changes and the keywords used, as PDF and DOCX. Each generation uses 1 credit.</p>
+                <p>Get a rewritten resume with a summary of the changes and the keywords used, as PDF and DOCX. Each generation uses 1 credit, and an optional cover letter uses 1 more.</p>
             </article>
         </div>
     </div>
@@ -370,7 +378,7 @@
         </details>
         <details class="faq">
             <summary>How do credits work?</summary>
-            <p>Each generation uses 1 credit. New accounts get 1 free credit, and if processing fails the credit is refunded automatically. Extra credits are available through Stripe checkout.</p>
+            <p>Each generation uses 1 credit, plus 1 more if you also ask for a cover letter. New accounts get 1 free credit, and if processing fails the credits are refunded automatically. Extra credits are available through Stripe checkout.</p>
         </details>
         <details class="faq">
             <summary>Does ATS-friendly mean I will get the job?</summary>
@@ -440,6 +448,13 @@
                 fileSelected.style.display = 'block';
                 uploadZone.classList.add('has-file');
             }
+        });
+
+        var coverLetter = document.getElementById('includeCoverLetter');
+        coverLetter.addEventListener('change', function () {
+            submitBtn.textContent = coverLetter.checked
+                ? '✦ Tailor resume + cover letter'
+                : '✦ Tailor my resume';
         });
 
         form.addEventListener('submit', function () {

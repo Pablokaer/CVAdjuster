@@ -240,6 +240,19 @@ h1 {
     scrollbar-width: thin;
     scrollbar-color: var(--border) transparent;
 }
+/* Cover letter panel */
+.cover-letter-panel { margin-top: 24px; }
+.panel-actions { display: flex; gap: 8px; flex-wrap: wrap; justify-content: flex-end; }
+.panel-actions a.copy-btn { text-decoration: none; }
+.letter-text { font-family: 'Inter', sans-serif; font-size: 14px; line-height: 1.7; }
+
+.alert-warning {
+    margin-top: 24px;
+    background: #FFF6E5;
+    border: 1px solid #F3D9A4;
+    color: #7A4B00;
+}
+
 .resume-text::-webkit-scrollbar { width: 5px; }
 .resume-text::-webkit-scrollbar-thumb { background: var(--border); border-radius: 3px; }
 

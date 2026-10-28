@@ -32,6 +32,9 @@ public enum CreditPlan {
 
     // ── Custo de cada geração de currículo ────────────────────────────────
     public static final int CREDITS_PER_RESUME = 1;
+
+    // ── Custo extra da cover letter opcional ──────────────────────────────
+    public static final int CREDITS_PER_COVER_LETTER = 1;
     // ─────────────────────────────────────────────────────────────────────
 
     private final String  displayName;

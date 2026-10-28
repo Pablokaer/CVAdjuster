@@ -3,6 +3,7 @@ package com.resumetailor.controller;
 import com.resumetailor.dto.TailorResponse;
 import com.resumetailor.exception.InsufficientCreditsException;
 import com.resumetailor.model.ResumeHistory;
+import com.resumetailor.payment.entity.CreditPlan;
 import com.resumetailor.repository.ResumeHistoryRepository;
 import com.resumetailor.repository.UserRepository;
 import com.resumetailor.service.ResumeExtractorService;
@@ -56,14 +57,15 @@ public class ResumeTailorController {
         @RequestParam("resumeFile") MultipartFile resumeFile,
         @RequestParam("jobDescription") String jobDescription,
         @RequestParam(value = "outputFormat", defaultValue = "pdf") String outputFormat,
+        @RequestParam(value = "includeCoverLetter", defaultValue = "false") boolean includeCoverLetter,
         HttpServletRequest httpRequest,
         Authentication authentication,
         Model model) {
         // resolve email regardless of login type (form or Google OAuth2)
         final String principal = UserService.extractEmail(authentication);
 
-        log.info("Tailor request: file={}, format={}",
-            sanitizeForLog(resumeFile.getOriginalFilename()), outputFormat);
+        log.info("Tailor request: file={}, format={}, coverLetter={}",
+            sanitizeForLog(resumeFile.getOriginalFilename()), outputFormat, includeCoverLetter);
 
         String validationError = validateTailorInput(resumeFile, jobDescription);
         if (validationError != null) {
@@ -74,22 +76,14 @@ public class ResumeTailorController {
         // Sanitize the input so raw content is never injected into prompts
         String sanitizedJobDescription = InputSanitizer.sanitizeJobDescription(jobDescription);
 
-        // Deduct 1 credit before processing — refunded if AI fails
+        TailorResponse response;
         try {
-            userService.deductCredit(principal);
+            // pass sanitized text to the tailoring service to avoid injecting raw content into prompts
+            response = runPaidTailoring(principal, resumeFile, sanitizedJobDescription, outputFormat, includeCoverLetter);
         } catch (InsufficientCreditsException e) {
-            model.addAttribute("error", e.getMessage());
+            model.addAttribute("error", insufficientCreditsMessage(e, includeCoverLetter));
             model.addAttribute("noCredits", true);
             return "index";
-        }
-
-        TailorResponse response =
-            // pass sanitized text to the tailoring service to avoid injecting raw content into prompts
-            resumeTailorService.tailorResume(resumeFile, sanitizedJobDescription, outputFormat);
-
-        if (!response.isSuccess()) {
-            // Refund the credit — user should not be charged for a failed attempt
-            userService.refundCredit(principal);
         }
 
         // Refresh credit balance so the result page shows the post-deduction value.
@@ -124,6 +118,10 @@ public class ResumeTailorController {
             model.addAttribute("format", response.getFormat());
             model.addAttribute("changes", response.getChanges());
             model.addAttribute("keywords", response.getKeywords());
+            model.addAttribute("coverLetterText", response.getCoverLetterText());
+            model.addAttribute("coverLetterPdfUrl", response.getCoverLetterPdfUrl());
+            model.addAttribute("coverLetterDocxUrl", response.getCoverLetterDocxUrl());
+            model.addAttribute("coverLetterFailed", response.isCoverLetterFailed());
 
             if (principal != null) {
                 final String finalPdfUrl  = pdfUrl;
@@ -140,6 +138,7 @@ public class ResumeTailorController {
                     entry.setFormat(outputFormat);
                     entry.setPdfFilename(finalPdfUrl.replace("/download/", ""));
                     entry.setDocxFilename(finalDocxUrl.replace("/download/", ""));
+                    entry.setCoverLetterText(response.getCoverLetterText());
                     historyRepository.save(entry);
                 });
             }
@@ -218,6 +217,7 @@ public class ResumeTailorController {
         @RequestParam("resumeFile") MultipartFile resumeFile,
         @RequestParam("jobDescription") String jobDescription,
         @RequestParam(value = "outputFormat", defaultValue = "pdf") String outputFormat,
+        @RequestParam(value = "includeCoverLetter", defaultValue = "false") boolean includeCoverLetter,
         Authentication authentication) {
 
         final String principal = UserService.extractEmail(authentication);
@@ -230,24 +230,53 @@ public class ResumeTailorController {
 
         String sanitizedJobDescription = InputSanitizer.sanitizeJobDescription(jobDescription);
 
-        // Same billing rules as the web form: 1 credit per attempt, refunded on failure
+        // Same billing rules as the web form
+        TailorResponse response;
         try {
-            userService.deductCredit(principal);
+            response = runPaidTailoring(principal, resumeFile, sanitizedJobDescription, outputFormat, includeCoverLetter);
         } catch (InsufficientCreditsException e) {
             return ResponseEntity.status(HttpStatus.PAYMENT_REQUIRED)
-                .body(TailorResponse.builder().success(false).message(e.getMessage()).build());
-        }
-
-        TailorResponse response =
-            resumeTailorService.tailorResume(resumeFile, sanitizedJobDescription, outputFormat);
-
-        if (!response.isSuccess()) {
-            userService.refundCredit(principal);
+                .body(TailorResponse.builder().success(false)
+                    .message(insufficientCreditsMessage(e, includeCoverLetter)).build());
         }
 
         return ResponseEntity
             .status(response.isSuccess() ? HttpStatus.OK : HttpStatus.UNPROCESSABLE_ENTITY)
             .body(response);
+    }
+
+    /**
+     * Charges up front, runs the generation and refunds what was not delivered:
+     * everything if the resume fails, or only the cover letter's credit if just
+     * the cover letter fails.
+     *
+     * @throws InsufficientCreditsException if the balance does not cover the request
+     */
+    private TailorResponse runPaidTailoring(String principal, MultipartFile resumeFile, String jobDescription,
+                                            String outputFormat, boolean includeCoverLetter) {
+        int cost = CreditPlan.CREDITS_PER_RESUME
+            + (includeCoverLetter ? CreditPlan.CREDITS_PER_COVER_LETTER : 0);
+        userService.deductCredits(principal, cost);
+
+        TailorResponse response =
+            resumeTailorService.tailorResume(resumeFile, jobDescription, outputFormat, includeCoverLetter);
+
+        if (!response.isSuccess()) {
+            // User should not be charged for a failed attempt
+            userService.refundCredits(principal, cost);
+        } else if (response.isCoverLetterFailed()) {
+            userService.refundCredits(principal, CreditPlan.CREDITS_PER_COVER_LETTER);
+        }
+        return response;
+    }
+
+    private static String insufficientCreditsMessage(InsufficientCreditsException e, boolean includeCoverLetter) {
+        if (!includeCoverLetter) {
+            return e.getMessage();
+        }
+        int cost = CreditPlan.CREDITS_PER_RESUME + CreditPlan.CREDITS_PER_COVER_LETTER;
+        return "A resume with a cover letter uses " + cost + " credits. "
+            + "Add credits, or uncheck the cover letter option.";
     }
 
     /**

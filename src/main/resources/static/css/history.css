@@ -183,6 +183,8 @@
 .hcard-btn.pdf:hover  { background: rgba(248,113,113,0.22); }
 .hcard-btn.docx { background: rgba(96,165,250,0.12);  color: #2a62a8; }
 .hcard-btn.docx:hover { background: rgba(96,165,250,0.22); }
+.hcard-btn.letter { background: rgba(167,139,250,0.14); color: #5b3fb0; }
+.hcard-btn.letter:hover { background: rgba(167,139,250,0.24); }
 .hcard-btn.view { background: rgba(0,140,136,0.12); color: var(--teal-dark); }
 .hcard-btn.view:hover { background: rgba(0,140,136,0.22); }
 

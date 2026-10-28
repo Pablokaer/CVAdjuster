@@ -118,13 +118,21 @@ public class UserService {
      */
     @Transactional
     public void deductCredit(String email) {
-        int cost = CreditPlan.CREDITS_PER_RESUME;
+        deductCredits(email, CreditPlan.CREDITS_PER_RESUME);
+    }
+
+    /**
+     * Deducts the given number of credits atomically, e.g. a resume plus a cover letter.
+     * Throws InsufficientCreditsException if the balance is insufficient.
+     */
+    @Transactional
+    public void deductCredits(String email, int amount) {
         // The balance check and the decrement are one statement, so two parallel
         // generations cannot both spend the last credit.
-        if (userRepository.decrementCreditsIfSufficient(email, cost) == 0) {
+        if (userRepository.decrementCreditsIfSufficient(email, amount) == 0) {
             throw new InsufficientCreditsException();
         }
-        log.info("Deducted {} credit(s) from {}", cost, email);
+        log.info("Deducted {} credit(s) from {}", amount, email);
     }
 
     /**
@@ -133,9 +141,14 @@ public class UserService {
      */
     @Transactional
     public void refundCredit(String email) {
-        int cost = CreditPlan.CREDITS_PER_RESUME;
-        if (userRepository.incrementCreditsByEmail(email, cost) > 0) {
-            log.info("Refunded {} credit(s) to {} after processing failure", cost, email);
+        refundCredits(email, CreditPlan.CREDITS_PER_RESUME);
+    }
+
+    /** Refunds the given number of credits after a processing failure. */
+    @Transactional
+    public void refundCredits(String email, int amount) {
+        if (userRepository.incrementCreditsByEmail(email, amount) > 0) {
+            log.info("Refunded {} credit(s) to {} after processing failure", amount, email);
         }
     }
 }
