@@ -96,17 +96,18 @@ public class UserService {
 
     /**
      * Atomically adds the given number of credits to the user.
-     * Returns the updated User so the caller can act on the new balance
-     * (e.g. send a purchase confirmation email) without a second DB round-trip.
+     * Returns the user re-read after the update so the caller sees the new balance
+     * (e.g. for the purchase confirmation email).
      * Returns empty if no user with the given ID exists.
      */
     @Transactional
     public Optional<User> addCredits(Long userId, int amount) {
+        if (userRepository.incrementCredits(userId, amount) == 0) {
+            return Optional.empty();
+        }
         return userRepository.findById(userId).map(user -> {
-            user.setCredits(user.getCredits() + amount);
-            User saved = userRepository.save(user);
-            log.info("Added {} credits to userId={} (new balance: {})", amount, userId, saved.getCredits());
-            return saved;
+            log.info("Added {} credits to userId={} (new balance: {})", amount, userId, user.getCredits());
+            return user;
         });
     }
 
@@ -118,14 +119,12 @@ public class UserService {
     @Transactional
     public void deductCredit(String email) {
         int cost = CreditPlan.CREDITS_PER_RESUME;
-        User user = userRepository.findByEmail(email)
-                .orElseThrow(InsufficientCreditsException::new);
-        if (user.getCredits() < cost) {
+        // The balance check and the decrement are one statement, so two parallel
+        // generations cannot both spend the last credit.
+        if (userRepository.decrementCreditsIfSufficient(email, cost) == 0) {
             throw new InsufficientCreditsException();
         }
-        user.setCredits(user.getCredits() - cost);
-        userRepository.save(user);
-        log.info("Deducted {} credit(s) from {} (new balance: {})", cost, email, user.getCredits());
+        log.info("Deducted {} credit(s) from {}", cost, email);
     }
 
     /**
@@ -135,10 +134,8 @@ public class UserService {
     @Transactional
     public void refundCredit(String email) {
         int cost = CreditPlan.CREDITS_PER_RESUME;
-        userRepository.findByEmail(email).ifPresent(user -> {
-            user.setCredits(user.getCredits() + cost);
-            userRepository.save(user);
-            log.info("Refunded {} credit(s) to {} after processing failure (balance: {})", cost, email, user.getCredits());
-        });
+        if (userRepository.incrementCreditsByEmail(email, cost) > 0) {
+            log.info("Refunded {} credit(s) to {} after processing failure", cost, email);
+        }
     }
 }

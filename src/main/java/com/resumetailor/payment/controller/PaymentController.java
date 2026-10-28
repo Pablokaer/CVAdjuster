@@ -25,12 +25,10 @@ public class PaymentController {
      * Creates a Stripe Checkout session and returns the redirect URL.
      *
      * Example request:
-     * {
-     *   "productName": "Pro – 20 Credits",
-     *   "amount": 1499,
-     *   "currency": "usd",
-     *   "creditsToAdd": 20
-     * }
+     * { "planId": "PRO" }
+     *
+     * Price, currency and credits come from the server-side CreditPlan enum;
+     * the client never sends amounts or credit counts.
      */
     @PostMapping("/checkout")
     public ResponseEntity<PaymentResponseDTO> createCheckout(
@@ -44,10 +42,14 @@ public class PaymentController {
 
     /**
      * GET /api/payment/orders/{id}
-     * Retrieves the current status of an order (for polling from the client).
+     * Retrieves the current status of one of the caller's own orders (for polling
+     * from the client). Returns 404 for missing orders and for other users' orders.
      */
     @GetMapping("/orders/{id}")
-    public ResponseEntity<Order> getOrder(@PathVariable Long id) {
-        return ResponseEntity.ok(paymentService.getOrderById(id));
+    public ResponseEntity<Order> getOrder(@PathVariable Long id, Authentication authentication) {
+        String email = UserService.extractEmail(authentication);
+        return paymentService.findOrderForUser(id, email)
+                .map(ResponseEntity::ok)
+                .orElseGet(() -> ResponseEntity.notFound().build());
     }
 }
