@@ -218,15 +218,15 @@ textarea:focus { outline: none; border-color: var(--mint); box-shadow: 0 0 0 3px
 #jd-word-count { display: block; margin-top: 6px; color: #a9d3d1; font-size: 12.5px; }
 #jd-word-count.over { color: #ffb4b4; }
 .checkbox-field {
-    display: flex; align-items: flex-start; gap: 12px; margin: 0 0 22px; cursor: pointer;
-    padding: 14px 16px; border: 1px solid rgba(143, 237, 224, .35); border-radius: 14px;
+    display: flex; align-items: center; justify-content: center; gap: 14px; margin: 0 0 22px; cursor: pointer;
+    padding: 14px 18px; border: 1px solid rgba(143, 237, 224, .35); border-radius: 14px;
     background: rgba(255,255,255,.05); transition: border-color .2s, background .2s;
     text-transform: none; letter-spacing: 0;
 }
 .checkbox-field:hover, .checkbox-field:has(input:checked) { border-color: var(--mint); background: rgba(255,255,255,.09); }
-.checkbox-field input { flex: none; width: 18px; height: 18px; margin: 2px 0 0; accent-color: var(--mint); cursor: pointer; }
+.checkbox-field input { flex: none; width: 22px; height: 22px; margin: 0; accent-color: var(--mint); cursor: pointer; }
 .checkbox-field input:focus-visible { outline: 2px solid var(--mint); outline-offset: 2px; }
-.checkbox-field span { margin: 0; color: #e8f7f5; font-size: 15px; font-weight: 600; }
+.checkbox-field span { margin: 0; color: #e8f7f5; font-size: 15px; font-weight: 600; text-align: center; }
 .checkbox-field small { display: block; margin-top: 2px; color: #a9d3d1; font-size: 12.5px; font-weight: 400; }
 
 /* trust features */
@@ -478,7 +478,7 @@ textarea:focus { outline: none; border-color: var(--mint); box-shadow: 0 0 0 3px
     .alert, .alert-credits { text-align: center; justify-content: center; }
     .cta-card { width: 100%; }
     .form-card, .form-card form { text-align: center; }
-    .form-card .field label, .checkbox-field { text-align: left; }
+    .form-card .field label { text-align: left; }
     .trust { align-items: center; }
     .trust li { flex-direction: column; text-align: center; gap: 8px; max-width: 26ch; }
     .chameleon { left: 50% !important; right: auto !important; transform: translateX(-50%); }
