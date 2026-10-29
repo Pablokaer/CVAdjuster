@@ -1,0 +1,44 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org">
+<head>
+    <!--
+      Installable app support (PWA, and the Android app, a Trusted Web Activity
+      that opens this site full screen). Included in the <head> of every page.
+
+      Inside the Android app, Google Play only allows Play Billing for digital
+      goods, so anything that sells credits is marked .purchase-only and hidden
+      there; .app-only shows what replaces it. The app opens /?source=twa, and
+      Android also sends an android-app:// referrer on launch; either marks the
+      session. The check runs before the body renders, so nothing flashes.
+    -->
+    <th:block th:fragment="head">
+        <link rel="manifest" href="/manifest.webmanifest">
+        <meta name="theme-color" content="#061B32">
+        <link rel="apple-touch-icon" href="/icons/apple-touch-icon.png">
+        <style>
+            html.in-app .purchase-only { display: none !important; }
+            html:not(.in-app) .app-only { display: none !important; }
+        </style>
+        <script>
+            (function () {
+                var KEY = 'cvfit-in-app';
+                var inApp = false;
+                try {
+                    if (/[?&]source=twa(&|$)/.test(location.search)
+                            || document.referrer.indexOf('android-app://') === 0) {
+                        sessionStorage.setItem(KEY, '1');
+                    }
+                    inApp = sessionStorage.getItem(KEY) === '1';
+                } catch (e) { /* storage blocked: treat as the website */ }
+                if (inApp) document.documentElement.classList.add('in-app');
+
+                if ('serviceWorker' in navigator) {
+                    window.addEventListener('load', function () {
+                        navigator.serviceWorker.register('/sw.js').catch(function () {});
+                    });
+                }
+            })();
+        </script>
+    </th:block>
+</head>
+</html>

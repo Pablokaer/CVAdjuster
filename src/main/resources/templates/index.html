@@ -14,6 +14,7 @@
     <link href="https://fonts.googleapis.com/css2?family=Sora:wght@400;600;700;800&family=Inter:wght@400;500;600&display=swap" rel="stylesheet">
 
     <link rel="icon" type="image/png" th:href="@{/favicon.png}">
+    <th:block th:replace="~{fragments/app-shell :: head}"></th:block>
     <link rel="apple-touch-icon" th:href="@{/images/logo-icon.png}">
     <link rel="stylesheet" th:href="@{/css/landing.css}">
     <th:block th:replace="~{fragments/social-meta :: meta('CV Fit AI — Your resume, built for the job', 'Upload your resume, paste the job description and get a tailored, ATS-friendly resume in seconds.')}"></th:block>
@@ -69,7 +70,7 @@
             <nav class="main-nav" aria-label="Main">
                 <a href="/about">About</a>
                 <a href="/#how-it-works">How it works</a>
-                <a href="/#pricing">Pricing</a>
+                <a href="/#pricing" class="purchase-only">Pricing</a>
                 <a href="/#faq">FAQ</a>
             </nav>
 
@@ -83,7 +84,7 @@
                     <svg width="12" height="12" viewBox="0 0 24 24" fill="currentColor" aria-hidden="true"><path d="M13 2L3 14h9l-1 8 10-12h-9l1-8z"/></svg>
                     <span th:text="${userCredits != null ? userCredits : 0}">0</span> credits
                 </span>
-                <a href="/credits" class="btn btn-light">+ Add credits</a>
+                <a href="/credits" class="btn btn-light purchase-only">+ Add credits</a>
                 <a href="/history" class="btn btn-light">History</a>
                 <form th:action="@{/logout}" method="post">
                     <button type="submit" class="btn btn-navy">Sign out</button>
@@ -147,7 +148,7 @@
         <div th:if="${param.error}" class="alert alert-error" role="alert">Error processing request</div>
         <div th:if="${noCredits}" class="alert alert-credits" role="alert">
             <span th:text="${error}">You don't have enough credits.</span>
-            <a href="/credits">Add credits →</a>
+            <a href="/credits" class="purchase-only">Add credits →</a>
         </div>
 
         <!-- Anonymous: CTA card -->
@@ -340,7 +341,7 @@
 </section>
 
 <!-- ============ PRICING ============ -->
-<section class="section section-tint" id="pricing">
+<section class="section section-tint purchase-only" id="pricing">
     <div class="section-inner">
         <p class="eyebrow">PRICING</p>
         <h2 class="section-title">Pay only for the resumes you generate</h2>
@@ -378,7 +379,7 @@
         </details>
         <details class="faq">
             <summary>How do credits work?</summary>
-            <p>Each generation uses 1 credit, plus 1 more if you also ask for a cover letter. New accounts get 1 free credit, and if processing fails the credits are refunded automatically. Extra credits are available through Stripe checkout.</p>
+            <p>Each generation uses 1 credit, plus 1 more if you also ask for a cover letter. New accounts get 1 free credit, and if processing fails the credits are refunded automatically.<span class="purchase-only"> Extra credits are available through Stripe checkout.</span></p>
         </details>
         <details class="faq">
             <summary>Does ATS-friendly mean I will get the job?</summary>
@@ -397,7 +398,7 @@
         </a>
         <nav aria-label="Footer">
             <a href="/about">About</a>
-            <a href="/#pricing">Pricing</a>
+            <a href="/#pricing" class="purchase-only">Pricing</a>
             <a href="/#faq">FAQ</a>
             <a href="/login" sec:authorize="!isAuthenticated()">Log in</a>
         </nav>

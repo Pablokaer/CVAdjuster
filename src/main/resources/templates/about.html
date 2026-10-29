@@ -7,6 +7,8 @@
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
   <link href="https://fonts.googleapis.com/css2?family=Sora:wght@400;600;700;800&family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+  <link rel="icon" type="image/png" th:href="@{/favicon.png}">
+  <th:block th:replace="~{fragments/app-shell :: head}"></th:block>
   <link rel="stylesheet" th:href="@{/css/base.css}">
   <link rel="stylesheet" th:href="@{/css/index.css}">
   <style>
@@ -167,7 +169,7 @@
         <ul>
           <li><strong>Cost per tailor:</strong> 1 credit per resume processing, plus 1 credit for an optional cover letter</li>
           <li><strong>New accounts:</strong> Start with 1 free credit to test the service</li>
-          <li><strong>Purchase credits:</strong> Buy credit packages from the Credits page at any time</li>
+          <li class="purchase-only"><strong>Purchase credits:</strong> Buy credit packages from the Credits page at any time</li>
           <li><strong>No expiration:</strong> Credits never expire and can be used whenever you need</li>
         </ul>
         <div class="highlight-box">

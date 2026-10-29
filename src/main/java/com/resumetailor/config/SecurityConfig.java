@@ -26,6 +26,9 @@ public class SecurityConfig {
                     "/forgot-password", "/reset-password", "/reset-password-success",
                     "/css/**", "/js/**", "/images/**",
                     "/favicon.ico", "/favicon.png",
+                    // Installable app: manifest, service worker, icons, offline page, Android asset links
+                    "/manifest.webmanifest", "/sw.js", "/offline.html", "/icons/**",
+                    "/.well-known/assetlinks.json",
                     // Error pages, including the 429 page for rate-limited anonymous requests
                     "/error",
                     // Stripe webhook must be publicly accessible (called by Stripe servers)
