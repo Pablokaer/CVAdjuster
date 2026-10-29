@@ -59,4 +59,4 @@ If the browser bar shows at the top of the app, the asset links are missing or t
 
 ## Releasing an update
 
-Increase `appVersionCode` (and `appVersionName`) in `twa-manifest.json`, then `bubblewrap update` and `bubblewrap build`, and upload the new `.aab`. This is only needed for shell changes; site changes need no release.
+Increase `appVersionCode` (and `appVersion`, the version name) in `twa-manifest.json`, then `bubblewrap update` and `bubblewrap build`, and upload the new `.aab`. This is only needed for shell changes; site changes need no release.
