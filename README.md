@@ -334,6 +334,22 @@ Use any future expiration date and any 3-digit CVC.
 - Credits are refunded when AI processing fails.
 - Stripe webhooks are validated by signature.
 
+### Rate Limits
+
+Abusable POST endpoints are rate limited in memory (Bucket4j, one app instance). Over the limit, the app answers `429 Too Many Requests` with a `Retry-After` header: browsers get `templates/error/429.html`, API clients get JSON.
+
+| Endpoint | Key | Limit |
+|---|---|---|
+| `POST /login` | client IP | 20 per 5 minutes, all attempts |
+| `POST /login` | email tried | locked for 15 minutes after 5 failed passwords; a successful login clears the count |
+| `POST /register` | client IP | 5 per hour, 20 per day |
+| `POST /forgot-password` | client IP | 5 per 15 minutes, 20 per day (plus the per-user cooldown) |
+| `POST /reset-password` | client IP | 10 per 15 minutes |
+| `POST /tailor`, `POST /api/tailor` | user | one generation at a time; 5 per minute, 30 per hour |
+| `POST /api/payment/checkout` | user | 5 per minute, 20 per hour |
+
+The limits live in `ratelimit/RateLimiter.java`. The Stripe webhook is not limited. The client IP comes from the last `X-Forwarded-For` entry, but only when the request arrives from a trusted proxy (`app.rate-limit.trusted-proxies`, loopback by default, which matches Apache on the same host); otherwise the socket address is used.
+
 ## Deployment
 
 The project includes:
