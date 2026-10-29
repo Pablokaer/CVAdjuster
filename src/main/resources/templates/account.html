@@ -1,0 +1,92 @@
+<!DOCTYPE html>
+<html lang="en"
+      xmlns:th="http://www.thymeleaf.org"
+      xmlns:sec="http://www.thymeleaf.org/extras/spring-security">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Account — CV FIT AI</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Sora:wght@400;600;700;800&family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+  <link rel="icon" type="image/png" th:href="@{/favicon.png}">
+  <th:block th:replace="~{fragments/app-shell :: head}"></th:block>
+  <link rel="stylesheet" th:href="@{/css/base.css}">
+  <style>
+    .account-row { display:flex; justify-content:space-between; gap:12px; padding:12px 0;
+                   border-bottom:1px solid var(--border); font-size:14px; font-family:'Inter',sans-serif; }
+    .account-row span:first-child { color:var(--text-muted); }
+    .account-row span:last-child { font-weight:600; overflow-wrap:anywhere; text-align:right; }
+    .danger-zone { text-align:left; margin-top:28px; padding-top:20px; border-top:1px solid rgba(194,59,59,0.25); }
+    .danger-zone h3 { text-align:center; font-family:'Sora',sans-serif; font-size:16px; color:var(--error); margin-bottom:8px; }
+    .danger-zone p, .danger-zone li { color:var(--text-muted); font-size:13px; font-family:'Inter',sans-serif;
+                                      line-height:1.6; text-transform:none; letter-spacing:0; }
+    .danger-zone ul { margin:8px 0 16px 18px; }
+    .btn-danger { width:100%; margin-top:16px; padding:13px 16px; border:none; border-radius:12px;
+                  background:var(--error); color:#fff; font-weight:700; font-size:15px; cursor:pointer;
+                  font-family:'Inter',sans-serif; }
+    .btn-danger:hover { filter:brightness(1.08); }
+  </style>
+</head>
+<body>
+
+<nav class="topbar">
+  <div class="topbar-inner">
+    <a href="/" class="topbar-brand" aria-label="CV Fit AI — home"><img class="brand-icon" th:src="@{/images/logo-icon.png}" alt="" width="42" height="46"><img class="brand-word" th:src="@{/images/font.png}" alt="CV Fit AI" width="99" height="19"></a>
+    <div class="topbar-actions">
+      <a href="/history" class="btn-nav-outline">History</a>
+      <form th:action="@{/logout}" method="post">
+        <button type="submit" class="btn-logout">Sign out</button>
+      </form>
+    </div>
+  </div>
+</nav>
+
+<div class="orb orb-1"></div>
+<div class="orb orb-2"></div>
+
+<div class="auth-wrapper">
+  <div class="card" style="max-width:460px; width:100%;">
+
+    <h2 style="font-family:'Sora',sans-serif; font-weight:700; font-size:22px; margin-bottom:16px;">Your account</h2>
+
+    <div class="account-row"><span>Email</span><span th:text="${email}">you@example.com</span></div>
+    <div class="account-row"><span>Credits</span><span th:text="${userCredits != null ? userCredits : 0}">0</span></div>
+    <div class="account-row"><span>Privacy</span><span><a href="/privacy" style="color:var(--accent); text-decoration:none;">Privacy policy</a></span></div>
+
+    <div class="danger-zone" id="delete">
+      <h3>Delete account</h3>
+      <p>This permanently deletes:</p>
+      <ul>
+        <li>your account and login</li>
+        <li>your resume history and cover letters</li>
+        <li>any remaining credits, which are not refunded</li>
+      </ul>
+      <p>Payment records (date, amount and plan) are kept for accounting, no longer linked to you. This cannot be undone.</p>
+
+      <div th:if="${deleteError}" class="alert alert-error" style="margin-top:14px;" th:text="${deleteError}">Error</div>
+
+      <form th:action="@{/account/delete}" method="post" style="margin-top:14px;"
+            onsubmit="return confirm('Delete your account permanently? This cannot be undone.');">
+        <input type="hidden" th:name="${_csrf.parameterName}" th:value="${_csrf.token}">
+
+        <div class="field" th:if="${hasPassword}">
+          <label for="password">Your password</label>
+          <input type="password" id="password" name="password" autocomplete="current-password" required>
+        </div>
+
+        <div class="field" style="margin-top:14px;">
+          <label for="confirmation">Type DELETE to confirm</label>
+          <input type="text" id="confirmation" name="confirmation" autocomplete="off" autocapitalize="characters"
+                 pattern="\s*DELETE\s*" required>
+        </div>
+
+        <button type="submit" class="btn-danger">Delete my account</button>
+      </form>
+    </div>
+
+  </div>
+</div>
+
+</body>
+</html>

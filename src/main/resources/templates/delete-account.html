@@ -1,0 +1,81 @@
+<!DOCTYPE html>
+<html lang="en"
+      xmlns:th="http://www.thymeleaf.org"
+      xmlns:sec="http://www.thymeleaf.org/extras/spring-security">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Delete Your Account — CV FIT AI</title>
+  <meta name="description" content="How to delete your CV Fit AI account and the data associated with it.">
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Sora:wght@400;600;700;800&family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+  <link rel="icon" type="image/png" th:href="@{/favicon.png}">
+  <th:block th:replace="~{fragments/app-shell :: head}"></th:block>
+  <link rel="stylesheet" th:href="@{/css/base.css}">
+  <style>
+    .auth-wrapper .card.doc { text-align:left; }
+    .doc h2 { text-align:center; }
+    .doc p, .doc li { color:var(--text-muted); font-size:14px; font-family:'Inter',sans-serif;
+                      line-height:1.65; text-transform:none; letter-spacing:0; }
+    .doc h3 { font-family:'Sora',sans-serif; font-size:16px; margin:22px 0 8px; }
+    .doc ol, .doc ul { margin:6px 0 0 20px; }
+    .doc a { color:var(--accent); }
+  </style>
+</head>
+<body>
+
+<nav class="topbar">
+  <div class="topbar-inner">
+    <a href="/" class="topbar-brand" aria-label="CV Fit AI — home"><img class="brand-icon" th:src="@{/images/logo-icon.png}" alt="" width="42" height="46"><img class="brand-word" th:src="@{/images/font.png}" alt="CV Fit AI" width="99" height="19"></a>
+  </div>
+</nav>
+
+<div class="orb orb-1"></div>
+<div class="orb orb-2"></div>
+
+<div class="auth-wrapper">
+  <div class="card doc" style="max-width:560px; width:100%;"
+       th:with="supportEmail=${@environment.getProperty('app.mail.from')}">
+
+    <h2 style="font-family:'Sora',sans-serif; font-weight:700; font-size:22px; margin-bottom:8px;">Delete your CV Fit AI account</h2>
+    <p>You can delete your account and its data at any time, from the website or from the Android app.</p>
+
+    <h3>How to delete it</h3>
+    <ol>
+      <li><a href="/login">Sign in</a> to CV Fit AI.</li>
+      <li>Open <a href="/account">Account</a> (or go to <strong>cvfitai.com/account</strong>).</li>
+      <li>Under <strong>Delete account</strong>, enter your password, type DELETE and confirm.</li>
+    </ol>
+    <p sec:authorize="isAuthenticated()" style="margin-top:10px;">
+      You're signed in: <a href="/account#delete">go straight to account deletion</a>.
+    </p>
+
+    <h3>Can't sign in?</h3>
+    <p>
+      Reset your password from <a href="/forgot-password">Forgot password</a>, or email
+      <a th:href="'mailto:' + ${supportEmail} + '?subject=Delete%20my%20account'" th:text="${supportEmail}">support</a>
+      from the address you registered with, asking for your account to be deleted. We delete it within 30 days.
+    </p>
+
+    <h3>What is deleted</h3>
+    <ul>
+      <li>Your account: email address and password hash</li>
+      <li>Your resume history: tailored resumes, cover letters and job description excerpts</li>
+      <li>Generated PDF and DOCX files</li>
+      <li>Password reset links and any remaining credits</li>
+    </ul>
+
+    <h3>What is kept</h3>
+    <ul>
+      <li>Payment records (date, amount, plan and Stripe reference), kept for accounting and tax purposes and no longer linked to your account</li>
+      <li>Server logs, which may contain your email address, are kept for a limited time for security and troubleshooting, then removed</li>
+    </ul>
+
+    <p style="margin-top:18px;">See the <a href="/privacy">privacy policy</a> for details.</p>
+
+  </div>
+</div>
+
+</body>
+</html>

@@ -86,6 +86,7 @@
                 </span>
                 <a href="/credits" class="btn btn-light purchase-only">+ Add credits</a>
                 <a href="/history" class="btn btn-light">History</a>
+                <a href="/account" class="btn btn-light">Account</a>
                 <form th:action="@{/logout}" method="post">
                     <button type="submit" class="btn btn-navy">Sign out</button>
                 </form>
@@ -146,6 +147,7 @@
         </ol>
 
         <div th:if="${param.error}" class="alert alert-error" role="alert">Error processing request</div>
+        <div th:if="${param.accountDeleted}" class="alert alert-success" role="status">Your account and its data have been deleted.</div>
         <div th:if="${noCredits}" class="alert alert-credits" role="alert">
             <span th:text="${error}">You don't have enough credits.</span>
             <a href="/credits" class="purchase-only">Add credits →</a>
@@ -400,6 +402,7 @@
             <a href="/about">About</a>
             <a href="/#pricing" class="purchase-only">Pricing</a>
             <a href="/#faq">FAQ</a>
+            <a href="/privacy">Privacy</a>
             <a href="/login" sec:authorize="!isAuthenticated()">Log in</a>
         </nav>
         <p>© CV Fit AI</p>

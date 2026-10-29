@@ -123,6 +123,24 @@ class ResumeTailorServiceTest {
         assertThat(unrelated).exists();
     }
 
+    @Test
+    void deleteGeneratedFilesRemovesResumeAndLetterFilesOnly() throws Exception {
+        String id = "resume-tailored-0f8fad5b-d9cb-469f-a165-70867728950e";
+        List<Path> generated = List.of(
+                Files.write(tempDir.resolve(id + ".pdf"), new byte[] {1}),
+                Files.write(tempDir.resolve(id + ".docx"), new byte[] {1}),
+                Files.write(tempDir.resolve(id + "-cover-letter.pdf"), new byte[] {1}),
+                Files.write(tempDir.resolve(id + "-cover-letter.docx"), new byte[] {1}));
+        Path other = Files.write(tempDir.resolve("resume-tailored-11111111-2222-3333-4444-555555555555.pdf"), new byte[] {1});
+
+        service.deleteGeneratedFiles(id + ".pdf");
+        service.deleteGeneratedFiles("../../etc/passwd");
+        service.deleteGeneratedFiles(null);
+
+        generated.forEach(p -> assertThat(p).doesNotExist());
+        assertThat(other).exists();
+    }
+
     private void stubResumeTailoring() throws Exception {
         when(resumeExtractorService.extractText(any())).thenReturn(RESUME);
         when(openAIService.tailorResume(RESUME, JOB))

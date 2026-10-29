@@ -14,6 +14,7 @@ import java.nio.file.Path;
 import java.nio.file.Paths;
 import java.time.Duration;
 import java.time.Instant;
+import java.util.List;
 import java.util.UUID;
 import java.util.stream.Stream;
 
@@ -200,6 +201,24 @@ public class ResumeTailorService {
                     .forEach(this::deleteGeneratedFile);
         } catch (IOException e) {
             log.warn("Could not clean generated resume files in {}", dir, e);
+        }
+    }
+
+    /**
+     * Deletes the files generated for a resume (and its cover letter, if any) now,
+     * instead of waiting for the hourly cleanup. Used when an account is deleted.
+     * Names that are not generated files are ignored, so this cannot touch anything else.
+     */
+    public void deleteGeneratedFiles(String resumeFilename) {
+        if (resumeFilename == null) return;
+        Path dir = Paths.get(tempDir);
+        String base = resumeFilename.replaceFirst("\\.(pdf|docx)$", "");
+        for (String name : List.of(base + ".pdf", base + ".docx",
+                base + "-cover-letter.pdf", base + "-cover-letter.docx")) {
+            Path path = dir.resolve(name).normalize();
+            if (path.getParent() != null && path.getParent().equals(dir.normalize()) && isGeneratedResumeFile(path)) {
+                deleteGeneratedFile(path);
+            }
         }
     }
 

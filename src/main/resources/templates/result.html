@@ -51,7 +51,7 @@
                      th:src="${userPicture}"
                      onerror="this.style.display='none'"/>
 
-                <span class="user-name" th:text="${#authentication.name}"></span>
+                <a href="/account" class="user-name" title="Account" style="text-decoration:none; color:inherit;" th:text="${#authentication.name}"></a>
 
                 <form th:action="@{/logout}" method="post">
                     <button type="submit" class="btn-logout">Sign out</button>

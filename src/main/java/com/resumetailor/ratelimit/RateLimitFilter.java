@@ -67,6 +67,11 @@ public class RateLimitFilter extends OncePerRequestFilter {
                 if (user == null || allow(limiter.checkoutPerUser, user, path, response))
                     chain.doFilter(request, response);
             }
+            case "/account/delete" -> {
+                String user = currentUser();
+                if (user == null || allow(limiter.accountDeletePerUser, user, path, response))
+                    chain.doFilter(request, response);
+            }
             default -> chain.doFilter(request, response);
         }
     }
