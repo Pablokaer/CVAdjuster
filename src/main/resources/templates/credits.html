@@ -14,6 +14,7 @@
     <link href="https://fonts.googleapis.com/css2?family=Sora:wght@400;600;700;800&family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet">
 
     <link rel="icon" type="image/png" th:href="@{/favicon.png}">
+    <th:block th:replace="~{fragments/app-shell :: head}"></th:block>
     <link rel="stylesheet" th:href="@{/css/base.css}">
     <link rel="stylesheet" th:href="@{/css/credits.css}">
 </head>
@@ -76,7 +77,8 @@
 
     <div class="credits-header">
         <div class="credits-hero-badge">⚡ Credits</div>
-        <h1>Add Credits</h1>
+        <h1 class="purchase-only">Add Credits</h1>
+        <h1 class="app-only">Your Credits</h1>
         <p class="subtitle">
             Each resume tailoring costs <strong th:text="${creditsPerResume}">1</strong> credit.<br>
             Credits never expire.
@@ -89,7 +91,7 @@
         </div>
     </div>
 
-    <div class="pricing-grid">
+    <div class="pricing-grid purchase-only">
 
         <div th:each="plan : ${plans}"
              th:classappend="${plan.featured} ? 'plan-featured'"
@@ -121,7 +123,7 @@
 
     </div>
 
-    <div class="credits-note">
+    <div class="credits-note purchase-only">
         <svg xmlns="http://www.w3.org/2000/svg" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><rect x="3" y="11" width="18" height="11" rx="2" ry="2"/><path d="M7 11V7a5 5 0 0 1 10 0v4"/></svg>
         Payments are securely processed by Stripe. We never store your card details.
     </div>

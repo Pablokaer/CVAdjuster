@@ -13,6 +13,7 @@
     <link href="https://fonts.googleapis.com/css2?family=Sora:wght@400;600;700;800&family=Inter:wght@300;400;500;600;700&family=DM+Mono:wght@400;500&display=swap" rel="stylesheet">
 
     <link rel="icon" type="image/png" th:href="@{/favicon.png}">
+    <th:block th:replace="~{fragments/app-shell :: head}"></th:block>
     <link rel="stylesheet" th:href="@{/css/base.css}">
     <link rel="stylesheet" th:href="@{/css/result.css}">
 </head>
@@ -38,7 +39,7 @@
                     <span>credits</span>
                 </span>
 
-                <a href="/credits" class="btn-add-credits">+ Add Credits</a>
+                <a href="/credits" class="btn-add-credits purchase-only">+ Add Credits</a>
 
                 <a href="/history" class="btn-nav-outline" style="display:inline-flex; align-items:center; gap:6px;">
                     <svg xmlns="http://www.w3.org/2000/svg" width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><circle cx="12" cy="12" r="10"/><polyline points="12 6 12 12 16 14"/></svg>
