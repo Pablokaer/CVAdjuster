@@ -53,3 +53,5 @@ android/gradlew
 android/gradlew.bat
 android/manifest-checksum.txt
 android/store_icon.png
+android/build/
+android/app-release-unsigned-aligned.apk
