@@ -32,5 +32,5 @@
   "isChromeOSOnly": false,
   "isMetaQuest": false,
   "fullScopeUrl": "https://cvfitai.com/",
-  "minSdkVersion": 21
+  "minSdkVersion": 24
 }
