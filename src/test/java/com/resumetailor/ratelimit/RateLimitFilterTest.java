@@ -129,6 +129,13 @@ class RateLimitFilterTest {
     }
 
     @Test
+    void accountDeletionIsLimitedPerUser() throws Exception {
+        login("user@example.com");
+        for (int i = 0; i < 5; i++) post("/account/delete", "10.0.0.1", null);
+        assertThat(post("/account/delete", "10.0.0.1", null).getStatus()).isEqualTo(429);
+    }
+
+    @Test
     void getRequestsAndOtherPathsAreNotLimited() throws Exception {
         for (int i = 0; i < 50; i++) {
             MockHttpServletRequest get = request("/login", "10.0.0.1", null);

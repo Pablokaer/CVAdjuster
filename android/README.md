@@ -20,6 +20,10 @@ Google Play only allows Play Billing for digital goods such as credits. Inside t
 
 Do not add links or text inside the app that send users to buy on the website: Play treats that as steering to another payment method.
 
+## Store listing
+
+Texts, graphics and the Data safety answers for Play Console are in [`store/`](store/LISTING.md). The privacy policy is at `https://cvfitai.com/privacy` and the account deletion page at `https://cvfitai.com/delete-account`.
+
 ## First build
 
 Requirements: Node.js 18+. Bubblewrap downloads its own JDK and Android SDK on the first run.

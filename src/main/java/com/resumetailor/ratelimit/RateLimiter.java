@@ -51,6 +51,10 @@ public class RateLimiter {
             perWindow(5, Duration.ofMinutes(1)),
             perWindow(20, Duration.ofHours(1)));
 
+    /** Account deletion attempts per user; each one checks the password. */
+    final KeyedLimit accountDeletePerUser = new KeyedLimit(
+            perWindow(5, Duration.ofMinutes(15)));
+
     /** Users with a resume generation in progress; one at a time each. */
     private final Set<String> tailoringInProgress = ConcurrentHashMap.newKeySet();
 

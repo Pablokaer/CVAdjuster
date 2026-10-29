@@ -24,6 +24,7 @@ public class SecurityConfig {
                 .requestMatchers(
                     "/", "/login", "/register", "/about",
                     "/forgot-password", "/reset-password", "/reset-password-success",
+                    "/privacy", "/delete-account",
                     "/css/**", "/js/**", "/images/**",
                     "/favicon.ico", "/favicon.png",
                     // Installable app: manifest, service worker, icons, offline page, Android asset links

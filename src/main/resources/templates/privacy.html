@@ -1,0 +1,134 @@
+<!DOCTYPE html>
+<html lang="en" xmlns:th="http://www.thymeleaf.org">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Privacy Policy — CV FIT AI</title>
+  <meta name="description" content="What data CV Fit AI collects, why, who processes it and how to delete it.">
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Sora:wght@400;600;700;800&family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+  <link rel="icon" type="image/png" th:href="@{/favicon.png}">
+  <th:block th:replace="~{fragments/app-shell :: head}"></th:block>
+  <link rel="stylesheet" th:href="@{/css/base.css}">
+  <style>
+    .policy { position:relative; z-index:1; max-width:760px; margin:0 auto; padding:112px 24px 120px; }
+    .policy h1 { font-family:'Sora',sans-serif; font-size:clamp(28px,5vw,38px); margin-bottom:6px; }
+    .policy h2 { font-family:'Sora',sans-serif; font-size:19px; margin:34px 0 10px; }
+    .policy p, .policy li, .policy td, .policy th { color:var(--text-muted); font-size:15px; line-height:1.7;
+                                                    font-family:'Inter',sans-serif; text-transform:none; letter-spacing:0; }
+    .policy ul { margin:6px 0 0 20px; }
+    .policy a { color:var(--accent); }
+    .policy strong { color:var(--text); }
+    .policy table { width:100%; border-collapse:collapse; margin-top:10px; }
+    .policy th, .policy td { text-align:left; vertical-align:top; padding:10px 8px; border-bottom:1px solid var(--border); font-size:14px; }
+    .policy th { color:var(--text); font-weight:600; }
+    .table-scroll { overflow-x:auto; }
+  </style>
+</head>
+<body>
+
+<nav class="topbar">
+  <div class="topbar-inner">
+    <a href="/" class="topbar-brand" aria-label="CV Fit AI — home"><img class="brand-icon" th:src="@{/images/logo-icon.png}" alt="" width="42" height="46"><img class="brand-word" th:src="@{/images/font.png}" alt="CV Fit AI" width="99" height="19"></a>
+  </div>
+</nav>
+
+<div class="orb orb-1"></div>
+<div class="orb orb-2"></div>
+
+<main class="policy" th:with="supportEmail=${@environment.getProperty('app.mail.from')}">
+
+  <h1>Privacy Policy</h1>
+  <p>Last updated: 29 October 2026</p>
+
+  <p>
+    This policy explains what personal data CV Fit AI (“we”, the website at cvfitai.com and its Android app)
+    collects, why, who processes it on our behalf, and how you can access or delete it.
+    Questions: <a th:href="'mailto:' + ${supportEmail}" th:text="${supportEmail}">support</a>.
+  </p>
+
+  <h2>What we collect and why</h2>
+  <div class="table-scroll">
+    <table>
+      <tr><th>Data</th><th>Why</th><th>How long</th></tr>
+      <tr>
+        <td>Email address and password (stored only as a BCrypt hash)</td>
+        <td>To create and secure your account and send service emails</td>
+        <td>Until you delete your account</td>
+      </tr>
+      <tr>
+        <td>The resume you upload and the job description you paste</td>
+        <td>To generate your tailored resume and optional cover letter. The uploaded file is read in memory and not stored; its text is sent to OpenAI for processing</td>
+        <td>Not stored after processing</td>
+      </tr>
+      <tr>
+        <td>Tailored resumes, cover letters and the first 200 characters of each job description</td>
+        <td>To show your history so you can download them again</td>
+        <td>Until you delete them with your account</td>
+      </tr>
+      <tr>
+        <td>Generated PDF and DOCX files</td>
+        <td>To let you download the result</td>
+        <td>Deleted automatically after 24 hours</td>
+      </tr>
+      <tr>
+        <td>Credit balance and payment records (plan, amount, date, status, Stripe reference)</td>
+        <td>To add purchased credits and for accounting</td>
+        <td>As required by tax and accounting law</td>
+      </tr>
+      <tr>
+        <td>IP address and request details</td>
+        <td>To protect the service against abuse (rate limiting, kept only in memory) and in server logs for security and troubleshooting</td>
+        <td>Memory: up to 24 hours. Logs: a limited period</td>
+      </tr>
+    </table>
+  </div>
+  <p>We do not sell your data, show ads, or use analytics or tracking tools.</p>
+
+  <h2>Legal basis</h2>
+  <p>
+    We process your data to provide the service you sign up for (performance of a contract), to keep payment
+    records (legal obligation), and to protect the service against abuse (legitimate interest).
+  </p>
+
+  <h2>Who processes data for us</h2>
+  <ul>
+    <li><strong>OpenAI</strong> generates the tailored resume and cover letter from your resume text and the job description. Under OpenAI's API terms, this data is not used to train their models.</li>
+    <li><strong>Stripe</strong> processes card payments on cvfitai.com. We never see or store your card details.</li>
+    <li><strong>Google</strong> delivers our emails (Gmail) and serves the fonts used by the pages (Google Fonts), which means your browser connects to Google's servers.</li>
+    <li>Our <strong>hosting provider</strong> runs the server and database where your account data is stored.</li>
+  </ul>
+  <p>Some of these providers are located in the United States; transfers rely on their standard contractual clauses or equivalent safeguards.</p>
+
+  <h2>Cookies and local storage</h2>
+  <p>
+    We use a single session cookie to keep you signed in. The site also stores a small offline page on your
+    device so the app can show a message when you have no connection, and the Android app remembers for the
+    current session that it is running as an app. None of this is used for tracking.
+  </p>
+
+  <h2>Security</h2>
+  <p>
+    All traffic is encrypted with HTTPS. Passwords are hashed with BCrypt, password reset links are single-use
+    and stored only as hashes, and sign-in attempts are rate limited.
+  </p>
+
+  <h2>Your rights</h2>
+  <p>
+    You can access, correct, export or delete your data, and object to or restrict its processing.
+    You can <strong>delete your account at any time</strong> from your <a href="/account">Account</a> page
+    (see <a href="/delete-account">how to delete your account</a>), or ask us by email.
+    If you are in the EU or UK, you can also complain to your local data protection authority.
+  </p>
+
+  <h2>Children</h2>
+  <p>CV Fit AI is not intended for anyone under 16, and we do not knowingly collect their data.</p>
+
+  <h2>Changes</h2>
+  <p>We will update this page if our practices change and change the date at the top. Significant changes will be announced by email.</p>
+
+</main>
+
+</body>
+</html>

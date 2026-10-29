@@ -280,6 +280,10 @@ target/resume-tailor-0.0.1-SNAPSHOT.jar
 | `GET` | `/history/{id}/text` | Required | Text for one history entry |
 | `GET` | `/history/{id}/download/{format}` | Required | Downloads a history entry as `pdf` or `docx` |
 | `GET` | `/history/{id}/cover-letter/download/{format}` | Required | Downloads the entry's cover letter as `pdf` or `docx` (404 if it has none) |
+| `GET` | `/account` | Required | Account page with account deletion |
+| `POST` | `/account/delete` | Required | Deletes the account, history and reset tokens (`password` for password accounts, `confirmation=DELETE`); payment records are kept, unlinked |
+| `GET` | `/privacy` | Public | Privacy policy |
+| `GET` | `/delete-account` | Public | How to delete an account (the URL given to Google Play) |
 | `POST` | `/api/payment/checkout` | Required | Creates a Stripe Checkout session |
 | `GET` | `/api/payment/orders/{id}` | Required | Gets order status |
 | `POST` | `/api/webhook/stripe` | Stripe signature | Receives Stripe events (CSRF disabled for this route) |
@@ -347,6 +351,7 @@ Abusable POST endpoints are rate limited in memory (Bucket4j, one app instance).
 | `POST /reset-password` | client IP | 10 per 15 minutes |
 | `POST /tailor`, `POST /api/tailor` | user | one generation at a time; 5 per minute, 30 per hour |
 | `POST /api/payment/checkout` | user | 5 per minute, 20 per hour |
+| `POST /account/delete` | user | 5 per 15 minutes (each attempt checks the password) |
 
 The limits live in `ratelimit/RateLimiter.java`. The Stripe webhook is not limited. The client IP comes from the last `X-Forwarded-For` entry, but only when the request arrives from a trusted proxy (`app.rate-limit.trusted-proxies`, loopback by default, which matches Apache on the same host); otherwise the socket address is used.
 
