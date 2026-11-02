@@ -120,7 +120,13 @@ public class OpenAIService {
             log.info("OpenAI completion succeeded. Tokens used: {}",
                     response.getUsage() != null ? response.getUsage().getTotalTokens() : "?");
 
-            return response.getChoices().get(0).getMessage().getContent();
+            Choice choice = response.getChoices().get(0);
+            if ("length".equals(choice.getFinishReason())) {
+                // A cut-off answer is broken JSON or a letter without an ending; never show it.
+                log.warn("OpenAI response hit the {} token limit and was cut off.", maxTokens);
+                throw new RuntimeException("The AI response was too long. Please try again with a shorter resume or job description.");
+            }
+            return choice.getMessage().getContent();
 
         } catch (WebClientResponseException e) {
             log.error("OpenAI API error: {} — {}", e.getStatusCode(), e.getResponseBodyAsString());
