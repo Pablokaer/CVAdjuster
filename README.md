@@ -28,7 +28,7 @@ Each generation consumes 1 credit. If processing fails, the credit is automatica
 
 - Resume upload in PDF or DOCX format, up to 10 MB.
 - Text extraction using Apache PDFBox and Apache POI.
-- Resume rewriting with OpenAI GPT-4o (model configurable through `openai.api.model`).
+- Resume rewriting with OpenAI GPT-4o mini (model configurable through `openai.api.model`).
 - ATS optimization focused on job-specific keywords.
 - Automatic PDF and DOCX generation.
 - Email and password registration/login.
