@@ -59,4 +59,34 @@ If the browser bar shows at the top of the app, the asset links are missing or t
 
 ## Releasing an update
 
-Increase `appVersionCode` (and `appVersion`, the version name) in `twa-manifest.json`, then `bubblewrap update` and `bubblewrap build`, and upload the new `.aab`. This is only needed for shell changes; site changes need no release.
+Site changes need no release: the app loads the live site. Release a new build only when the Android shell changes (name, icon, colors, start URL in `twa-manifest.json`, the Bubblewrap version, or Google's yearly target SDK requirement).
+
+Releases are built and uploaded by [`.github/workflows/android-release.yml`](../.github/workflows/android-release.yml):
+
+```bash
+git tag android-v1.0.1
+git push origin android-v1.0.1
+```
+
+or Actions > Android release > Run workflow, which also lets you pick the track (internal by default) and the version code. The workflow sets the version name from the tag, uses the run number + 1 as the version code (Play rejects a repeated one), builds and signs the bundle with the upload key, and uploads it to Play. The `.aab` and `.apk` are also kept as run artifacts for 30 days. Pull requests that touch `twa-manifest.json` or the workflow only build the app, with a throwaway key.
+
+### One-time setup
+
+The very first `.aab` must be uploaded by hand in Play Console; the API cannot create the app's first release.
+
+1. In Google Cloud Console, enable the **Google Play Android Developer API** in a project and create a service account with a **JSON key**.
+2. In Play Console > Users and permissions, invite the service account's email and give it permission to release to testing tracks (and production, if wanted) for CV Fit AI.
+3. In GitHub > Settings > Secrets and variables > Actions, add:
+
+   | Secret | Value |
+   |---|---|
+   | `ANDROID_KEYSTORE_BASE64` | The upload keystore in base64 (`base64 -w0 cvfitai-upload.keystore`, or `[Convert]::ToBase64String([IO.File]::ReadAllBytes("cvfitai-upload.keystore"))` in PowerShell) |
+   | `ANDROID_KEYSTORE_PASSWORD` | The keystore password |
+   | `ANDROID_KEY_PASSWORD` | The password of the `upload` key |
+   | `PLAY_SERVICE_ACCOUNT_JSON` | The service account's JSON key |
+
+With Play App Signing this is only the upload key: if it leaks, Google can replace it. Keep an offline backup anyway.
+
+While the app has never been published, Play only accepts releases with status `draft`; run the workflow by hand with status `draft` and roll the release out in Play Console.
+
+To build by hand instead, set `appVersion` and a new `appVersionCode` in `twa-manifest.json`, then run `bubblewrap update --skipVersionUpgrade` and `bubblewrap build`, and upload the `.aab`.
