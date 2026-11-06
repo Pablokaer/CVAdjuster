@@ -259,8 +259,8 @@ target/resume-tailor-0.0.1-SNAPSHOT.jar
 
 | Method | Route | Authentication | Description |
 | --- | --- | --- | --- |
-| `GET` | `/` | Public | Home page and main form |
-| `GET` | `/about` | Public | About page |
+| `GET` | `/` | Public | Home page and main form (Markdown with `Accept: text/markdown`) |
+| `GET` | `/about` | Public | About page (Markdown with `Accept: text/markdown`) |
 | `GET` | `/login` | Public | Login page |
 | `GET` | `/register` | Public | Registration page |
 | `POST` | `/register` | Public | Creates a user |
@@ -287,8 +287,18 @@ target/resume-tailor-0.0.1-SNAPSHOT.jar
 | `POST` | `/api/payment/checkout` | Required | Creates a Stripe Checkout session |
 | `GET` | `/api/payment/orders/{id}` | Required | Gets order status |
 | `POST` | `/api/webhook/stripe` | Stripe signature | Receives Stripe events (CSRF disabled for this route) |
+| `GET` | `/robots.txt`, `/sitemap.xml` | Public | Crawler rules and the list of public pages |
+| `GET` | `/llms.txt` | Public | Site guide for AI agents ([llmstxt.org](https://llmstxt.org) format) |
+| `GET` | `/openapi.json` | Public | OpenAPI 3.1 description of the API |
 
-All routes not explicitly public in `SecurityConfig` require an authenticated session; unauthenticated requests are redirected to `/login`.
+All routes not explicitly public in `SecurityConfig` require an authenticated session. Unauthenticated requests to pages are redirected to `/login`; to `/api/**` they get a `401`, and to paths no controller handles a `404`.
+
+### Errors and AI agents
+
+- Errors on `/api/**` are always RFC 9457 problem details (`application/problem+json`) with a machine-readable `code` (`not_found`, `authentication_required`, `csrf_token_invalid`, `rate_limited`, `invalid_plan`...) and a `hint`. `POST /api/tailor` keeps reporting validation and generation failures in its own `TailorResponse` body.
+- Other errors use the real status code and come as Markdown for `Accept: text/markdown`, JSON when JSON is preferred, and the HTML error page otherwise (`templates/error.html`, `templates/error/429.html`). `ErrorRenderer` builds all of them.
+- `/` and `/about` answer `Accept: text/markdown` with the texts in `src/main/resources/markdown/` (prices are filled in from `CreditPlan`), and send `Vary: Accept`. Keep those files in step with the HTML pages.
+- `static/openapi.json` is written by hand; a test validates it and checks every path in it has a controller.
 
 ## Database
 

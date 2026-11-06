@@ -1,0 +1,22 @@
+# CV Fit AI
+
+> CV Fit AI tailors a resume to a job description with AI. Upload a PDF or DOCX resume, paste the job post, and download an ATS-friendly rewritten resume as PDF and DOCX, with an optional cover letter. It is pay per use with credits, and new accounts get 1 free credit.
+
+The pages below are public. The home page and the About page are also served as Markdown when requested with the header `Accept: text/markdown`.
+
+Generating a resume needs a free account, because it uses credits. The API is the one the web app uses: it works with the session cookie of a signed-in user and a CSRF token, and does not offer API keys.
+
+## Docs
+
+- [Home](https://cvfitai.com/): What CV Fit AI does, how it works, pricing and FAQ
+- [About](https://cvfitai.com/about): Inputs, outputs, credits and limitations
+- [API reference](https://cvfitai.com/openapi.json): OpenAPI 3.1 description of the endpoints, authentication and error format
+
+## Policies
+
+- [Privacy policy](https://cvfitai.com/privacy): What data is collected, who processes it and for how long
+- [Delete your account](https://cvfitai.com/delete-account): How to delete an account and its data
+
+## Optional
+
+- [Sitemap](https://cvfitai.com/sitemap.xml): All public pages

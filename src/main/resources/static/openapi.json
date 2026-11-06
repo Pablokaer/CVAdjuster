@@ -1,0 +1,435 @@
+{
+  "openapi": "3.1.0",
+  "info": {
+    "title": "CV Fit AI API",
+    "version": "1.0.0",
+    "summary": "Tailor a resume to a job description, and buy credits.",
+    "description": "This is the API the CV Fit AI web app uses. It acts on behalf of a signed-in user and does not offer API keys.\n\n**Authentication.** Sign in through the web form: `POST /login` with the form fields `email`, `password` and `_csrf` sets the `JSESSIONID` session cookie. Requests that change data (POST) also need the CSRF token: signed-in pages carry it in `<meta name=\"_csrf\">`, and it is sent in the `X-CSRF-TOKEN` header.\n\n**Credits.** Each resume uses 1 credit and an optional cover letter 1 more. Credits are charged when the request starts and refunded automatically for any part that fails.\n\n**Errors.** Errors from the platform (sign-in, CSRF, rate limits, unknown paths, invalid requests) use RFC 9457 problem details (`application/problem+json`) with a machine-readable `code` and a `hint`. `POST /api/tailor` reports validation and generation failures in its own response body, with `success: false` and a `message`.\n\n**Rate limits.** Resume generation: 5 per minute and 30 per hour per user, one at a time. Checkout: 5 per minute and 20 per hour per user. A `429` response has a `Retry-After` header.\n\nThe Stripe webhook endpoint is called only by Stripe and is not part of this API.",
+    "contact": {
+      "name": "CV Fit AI",
+      "url": "https://cvfitai.com/privacy"
+    }
+  },
+  "externalDocs": {
+    "description": "Site guide for AI agents",
+    "url": "https://cvfitai.com/llms.txt"
+  },
+  "servers": [
+    {
+      "url": "https://cvfitai.com"
+    }
+  ],
+  "tags": [
+    {
+      "name": "Resumes",
+      "description": "Tailor a resume and download the results"
+    },
+    {
+      "name": "Payments",
+      "description": "Buy credits through Stripe checkout"
+    }
+  ],
+  "paths": {
+    "/api/tailor": {
+      "post": {
+        "tags": ["Resumes"],
+        "operationId": "tailorResume",
+        "summary": "Tailor a resume to a job description",
+        "description": "Extracts the text of the uploaded resume, rewrites it for the job description and generates PDF and DOCX files. Uses 1 credit, plus 1 when `includeCoverLetter` is true. Can take up to two minutes.",
+        "security": [
+          {
+            "sessionCookie": [],
+            "csrfToken": []
+          }
+        ],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "multipart/form-data": {
+              "schema": {
+                "type": "object",
+                "required": ["resumeFile", "jobDescription"],
+                "properties": {
+                  "resumeFile": {
+                    "type": "string",
+                    "contentMediaType": "application/octet-stream",
+                    "description": "The resume as a PDF or DOCX file, up to 10 MB. The text must be selectable (scanned PDFs fail)."
+                  },
+                  "jobDescription": {
+                    "type": "string",
+                    "description": "The text of the job posting, up to 3,000 words."
+                  },
+                  "outputFormat": {
+                    "type": "string",
+                    "enum": ["pdf", "docx"],
+                    "default": "pdf",
+                    "description": "Preferred format. Both PDF and DOCX are always generated."
+                  },
+                  "includeCoverLetter": {
+                    "type": "boolean",
+                    "default": false,
+                    "description": "Also write a cover letter based on the tailored resume (1 extra credit)."
+                  }
+                }
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "The tailored resume. If a cover letter was requested but failed, `coverLetterFailed` is true and its credit was refunded.",
+            "content": {
+              "application/json": {
+                "schema": { "$ref": "#/components/schemas/TailorResponse" }
+              }
+            }
+          },
+          "400": {
+            "description": "Invalid input: no file, unsupported file type, empty or too long job description.",
+            "content": {
+              "application/json": {
+                "schema": { "$ref": "#/components/schemas/TailorResponse" }
+              },
+              "application/problem+json": {
+                "schema": { "$ref": "#/components/schemas/Problem" }
+              }
+            }
+          },
+          "401": { "$ref": "#/components/responses/AuthenticationRequired" },
+          "402": {
+            "description": "Not enough credits for this request. Nothing was charged.",
+            "content": {
+              "application/json": {
+                "schema": { "$ref": "#/components/schemas/TailorResponse" }
+              }
+            }
+          },
+          "403": { "$ref": "#/components/responses/Forbidden" },
+          "413": { "$ref": "#/components/responses/PayloadTooLarge" },
+          "422": {
+            "description": "The resume could not be read or generated. The credits were refunded.",
+            "content": {
+              "application/json": {
+                "schema": { "$ref": "#/components/schemas/TailorResponse" }
+              }
+            }
+          },
+          "429": { "$ref": "#/components/responses/RateLimited" },
+          "500": { "$ref": "#/components/responses/InternalError" }
+        }
+      }
+    },
+    "/download/{filename}": {
+      "get": {
+        "tags": ["Resumes"],
+        "operationId": "downloadGeneratedFile",
+        "summary": "Download a generated file",
+        "description": "Downloads a file from the URLs returned by `POST /api/tailor`. Generated files are deleted after 24 hours.",
+        "security": [
+          {
+            "sessionCookie": []
+          }
+        ],
+        "parameters": [
+          {
+            "name": "filename",
+            "in": "path",
+            "required": true,
+            "schema": { "type": "string" },
+            "description": "The file name from a download URL."
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "The file.",
+            "content": {
+              "application/pdf": {
+                "schema": { "type": "string", "contentMediaType": "application/pdf" }
+              },
+              "application/vnd.openxmlformats-officedocument.wordprocessingml.document": {
+                "schema": {
+                  "type": "string",
+                  "contentMediaType": "application/vnd.openxmlformats-officedocument.wordprocessingml.document"
+                }
+              }
+            }
+          },
+          "302": {
+            "description": "Not signed in: redirect to the sign-in page."
+          },
+          "400": {
+            "description": "Invalid file name."
+          },
+          "404": {
+            "description": "The file does not exist or has expired."
+          }
+        }
+      }
+    },
+    "/api/payment/checkout": {
+      "post": {
+        "tags": ["Payments"],
+        "operationId": "createCheckout",
+        "summary": "Start a Stripe checkout for a credit plan",
+        "description": "Creates a pending order and a Stripe Checkout session. Send the user to `checkoutUrl`; the credits are added after Stripe confirms the payment. Prices and credits come from the server; only the plan is sent.",
+        "security": [
+          {
+            "sessionCookie": [],
+            "csrfToken": []
+          }
+        ],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": { "$ref": "#/components/schemas/CheckoutRequest" }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "Checkout session created.",
+            "content": {
+              "application/json": {
+                "schema": { "$ref": "#/components/schemas/CheckoutResponse" }
+              }
+            }
+          },
+          "400": { "$ref": "#/components/responses/InvalidRequest" },
+          "401": { "$ref": "#/components/responses/AuthenticationRequired" },
+          "403": { "$ref": "#/components/responses/Forbidden" },
+          "429": { "$ref": "#/components/responses/RateLimited" },
+          "502": { "$ref": "#/components/responses/UpstreamUnavailable" }
+        }
+      }
+    },
+    "/api/payment/orders/{id}": {
+      "get": {
+        "tags": ["Payments"],
+        "operationId": "getOrder",
+        "summary": "Get the status of one of your orders",
+        "security": [
+          {
+            "sessionCookie": []
+          }
+        ],
+        "parameters": [
+          {
+            "name": "id",
+            "in": "path",
+            "required": true,
+            "schema": { "type": "integer", "format": "int64" },
+            "description": "The `orderId` returned by the checkout."
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "The order.",
+            "content": {
+              "application/json": {
+                "schema": { "$ref": "#/components/schemas/Order" }
+              }
+            }
+          },
+          "401": { "$ref": "#/components/responses/AuthenticationRequired" },
+          "404": { "$ref": "#/components/responses/NotFound" }
+        }
+      }
+    }
+  },
+  "components": {
+    "securitySchemes": {
+      "sessionCookie": {
+        "type": "apiKey",
+        "in": "cookie",
+        "name": "JSESSIONID",
+        "description": "Session cookie set by signing in at https://cvfitai.com/login."
+      },
+      "csrfToken": {
+        "type": "apiKey",
+        "in": "header",
+        "name": "X-CSRF-TOKEN",
+        "description": "CSRF token of the session, from the `_csrf` meta tag of a signed-in page. Required for POST requests."
+      }
+    },
+    "schemas": {
+      "Problem": {
+        "type": "object",
+        "description": "RFC 9457 problem details.",
+        "required": ["type", "title", "status", "detail", "code", "hint"],
+        "properties": {
+          "type": { "type": "string", "description": "Always `about:blank`; `code` identifies the error." },
+          "title": { "type": "string", "description": "The HTTP status reason phrase." },
+          "status": { "type": "integer" },
+          "detail": { "type": "string", "description": "What went wrong, readable by people." },
+          "instance": { "type": "string", "description": "The request path." },
+          "code": {
+            "type": "string",
+            "description": "Machine-readable error code.",
+            "examples": [
+              "invalid_request",
+              "invalid_plan",
+              "authentication_required",
+              "forbidden",
+              "csrf_token_invalid",
+              "not_found",
+              "method_not_allowed",
+              "payload_too_large",
+              "unsupported_media_type",
+              "rate_limited",
+              "upstream_unavailable",
+              "internal_error"
+            ]
+          },
+          "hint": { "type": "string", "description": "How to fix or retry the request." },
+          "docs": { "type": "string", "format": "uri" }
+        }
+      },
+      "TailorResponse": {
+        "type": "object",
+        "required": ["success"],
+        "properties": {
+          "success": { "type": "boolean" },
+          "message": { "type": ["string", "null"], "description": "Error or status message." },
+          "tailoredResumeText": { "type": ["string", "null"] },
+          "downloadUrl": { "type": ["string", "null"], "description": "Relative URL of the tailored resume as PDF." },
+          "docxDownloadUrl": { "type": ["string", "null"], "description": "Relative URL of the tailored resume as DOCX." },
+          "format": { "type": ["string", "null"], "enum": ["pdf", "docx", null] },
+          "changes": {
+            "type": ["array", "null"],
+            "items": { "$ref": "#/components/schemas/ChangeHighlight" }
+          },
+          "keywords": {
+            "type": ["array", "null"],
+            "items": { "$ref": "#/components/schemas/KeywordMatch" }
+          },
+          "coverLetterText": { "type": ["string", "null"] },
+          "coverLetterPdfUrl": { "type": ["string", "null"] },
+          "coverLetterDocxUrl": { "type": ["string", "null"] },
+          "coverLetterFailed": { "type": "boolean" }
+        }
+      },
+      "ChangeHighlight": {
+        "type": "object",
+        "properties": {
+          "original": { "type": "string" },
+          "tailored": { "type": "string" },
+          "reason": { "type": "string" }
+        }
+      },
+      "KeywordMatch": {
+        "type": "object",
+        "properties": {
+          "keyword": { "type": "string" },
+          "present": { "type": "boolean", "description": "Whether the keyword appears in the tailored resume." }
+        }
+      },
+      "CheckoutRequest": {
+        "type": "object",
+        "required": ["planId"],
+        "properties": {
+          "planId": { "type": "string", "enum": ["STARTER", "PRO", "PREMIUM"] }
+        }
+      },
+      "CheckoutResponse": {
+        "type": "object",
+        "properties": {
+          "orderId": { "type": "integer", "format": "int64" },
+          "stripeSessionId": { "type": "string" },
+          "checkoutUrl": { "type": "string", "format": "uri" },
+          "status": { "$ref": "#/components/schemas/OrderStatus" }
+        }
+      },
+      "Order": {
+        "type": "object",
+        "properties": {
+          "id": { "type": "integer", "format": "int64" },
+          "productName": { "type": "string" },
+          "amount": { "type": "integer", "format": "int64", "description": "Amount in cents." },
+          "currency": { "type": "string", "examples": ["eur"] },
+          "status": { "$ref": "#/components/schemas/OrderStatus" },
+          "stripeSessionId": { "type": ["string", "null"] },
+          "userId": { "type": "integer", "format": "int64" },
+          "creditsToAdd": { "type": "integer" },
+          "createdAt": { "type": "string", "description": "Server local time, ISO 8601 without an offset." }
+        }
+      },
+      "OrderStatus": {
+        "type": "string",
+        "enum": ["PENDING", "PAID", "CANCELED", "FAILED"]
+      }
+    },
+    "responses": {
+      "InvalidRequest": {
+        "description": "The request is missing a field or has an invalid value.",
+        "content": {
+          "application/problem+json": {
+            "schema": { "$ref": "#/components/schemas/Problem" }
+          }
+        }
+      },
+      "AuthenticationRequired": {
+        "description": "Not signed in.",
+        "content": {
+          "application/problem+json": {
+            "schema": { "$ref": "#/components/schemas/Problem" }
+          }
+        }
+      },
+      "Forbidden": {
+        "description": "Missing or invalid CSRF token (`code: csrf_token_invalid`).",
+        "content": {
+          "application/problem+json": {
+            "schema": { "$ref": "#/components/schemas/Problem" }
+          }
+        }
+      },
+      "NotFound": {
+        "description": "No such resource, or it belongs to another user.",
+        "content": {
+          "application/problem+json": {
+            "schema": { "$ref": "#/components/schemas/Problem" }
+          }
+        }
+      },
+      "PayloadTooLarge": {
+        "description": "The upload is larger than 10 MB.",
+        "content": {
+          "application/problem+json": {
+            "schema": { "$ref": "#/components/schemas/Problem" }
+          }
+        }
+      },
+      "RateLimited": {
+        "description": "Too many requests.",
+        "headers": {
+          "Retry-After": {
+            "description": "Seconds to wait before retrying.",
+            "schema": { "type": "integer" }
+          }
+        },
+        "content": {
+          "application/problem+json": {
+            "schema": { "$ref": "#/components/schemas/Problem" }
+          }
+        }
+      },
+      "UpstreamUnavailable": {
+        "description": "The payment provider could not be reached. Nothing was charged.",
+        "content": {
+          "application/problem+json": {
+            "schema": { "$ref": "#/components/schemas/Problem" }
+          }
+        }
+      },
+      "InternalError": {
+        "description": "Unexpected server error.",
+        "content": {
+          "application/problem+json": {
+            "schema": { "$ref": "#/components/schemas/Problem" }
+          }
+        }
+      }
+    }
+  }
+}
