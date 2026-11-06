@@ -1,6 +1,6 @@
 package com.resumetailor.payment.entity;
 
-import com.resumetailor.payment.exception.PaymentException;
+import com.resumetailor.payment.exception.InvalidPlanException;
 import lombok.Getter;
 import lombok.RequiredArgsConstructor;
 
@@ -69,6 +69,6 @@ public enum CreditPlan {
         for (CreditPlan plan : values()) {
             if (plan.name().equalsIgnoreCase(id)) return plan;
         }
-        throw new PaymentException("Invalid plan ID: " + id);
+        throw new InvalidPlanException(id);
     }
 }

@@ -1,0 +1,16 @@
+# CV Fit AI
+# Public pages and agent docs: https://cvfitai.com/llms.txt
+User-agent: *
+Allow: /
+Disallow: /account
+Disallow: /credits
+Disallow: /history
+Disallow: /download/
+Disallow: /open-in-gdocs/
+Disallow: /api/
+Disallow: /login
+Disallow: /register
+Disallow: /forgot-password
+Disallow: /reset-password
+
+Sitemap: https://cvfitai.com/sitemap.xml
